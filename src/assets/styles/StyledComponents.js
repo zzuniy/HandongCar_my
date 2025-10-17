@@ -61,24 +61,6 @@ export const themeColors = {
     color: "#EF5302",
   },
   yellow : {
-    color: "#F5C002",
-  },
-  green : {
-    color: "#588B49",
-  },
-  blue: {
-    color: "#387D9E",
-  },
-  brown: {
-    color: "#3E2214"
-  },
-  black: {
-    color: "#2C2C2C",
-  },
-  white: {
-    color: "#FFFDF5",
-  },
-  gray : {
-    color: "#BABABA",
+    color: "#fff242",
   }
 };
