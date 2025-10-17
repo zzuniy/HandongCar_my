@@ -57,10 +57,10 @@ export const Box = styled.div`
 `; //마진값을 동적으로 사용
 
 export const themeColors = {
-  red : {
-    color: "#EF5302",
+  blue : {
+    color: "#6a5af9",
   },
-  yellow : {
-    color: "#fff242",
+  purple : {
+    color: "#b66bff",
   }
 };
