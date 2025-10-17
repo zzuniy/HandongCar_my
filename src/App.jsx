@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import detailPage from './pages/detail';
-import createPage from './pages/create';
-import updatePage from './pages/update';
+import DetailPage from './pages/detail';
+import CreatePage from './pages/create';
+import UpdatePage from './pages/update';
 import MainLayout from './Layouts/MainLayout';
 
 export default function App() {
@@ -12,9 +12,9 @@ export default function App() {
         <Routes>
           <Route element={<MainLayout/>}> 
             <Route path="/" element={<Home />} />
-            <Route path="/detail" element={<detailPage />} />
-            <Route path="/create" element={<createPage />} />
-            <Route path="/update" element={<updatePage />} />
+            <Route path="/detail" element={<DetailPage />} />
+            <Route path="/create" element={<CreatePage />} />
+            <Route path="/update" element={<UpdatePage />} />
             
           </Route>
         </Routes>

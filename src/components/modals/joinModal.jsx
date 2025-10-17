@@ -16,7 +16,7 @@ const backgroundDim = styled.div`
 `;
 
 
-export default function detail(){
+export default function Join(){
   return(
     <>
       <backgroundDim>
