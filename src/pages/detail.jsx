@@ -16,6 +16,7 @@ const RightPage = styled.div`
 const Container = styled.div`
   border-radius: 15px;
   border: 1px solid black;
+  padding: 30%;
 `;
 
 function DetailPage(){
