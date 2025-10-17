@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 
 
-function updatePage(){
+function UpdatePage(){
   return(
     <>
       <h1>update Page</h1>
@@ -11,4 +11,4 @@ function updatePage(){
   );
 };
 
-export default updatePage;
+export default UpdatePage;

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 
 
-function createPage(){
+function CreatePage(){
   return(
     <>
       <h1>create Page</h1>
@@ -11,4 +11,4 @@ function createPage(){
   );
 };
 
-export default createPage;
+export default CreatePage;
