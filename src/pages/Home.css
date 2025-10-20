@@ -56,3 +56,16 @@
 .card-actions {
   display: flex;
 }
+
+.card-info {
+    background: none;
+    color: #5b5b5b;
+}
+.detail {
+    color: white;
+    width: 100%;
+    background: linear-gradient(135deg, #6a5af9, #b66bff);
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+}

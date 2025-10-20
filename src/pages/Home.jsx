@@ -71,7 +71,7 @@ function Card(){
               <p><FaUserFriends /> {item.member}/4</p>
               <p><FaPhoneAlt /> {item.phone}</p>
           </div>
-          <button>상세보기</button>
+          <button className="detail">상세보기</button>
         </div>
       ))}
     </div>
