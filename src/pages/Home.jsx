@@ -60,8 +60,7 @@ function Card(){
             <p>{item.status}</p>
             <button>수정</button>
             <button>삭제</button>
-            <p>{item.출발}</p>
-            <p>to{item.도착}</p>
+            <p>{item.출발} → {item.도착}</p>
             <p>{item.date}</p>
             <p>{item.member}/4</p>
             <p>{item.phone}</p>
