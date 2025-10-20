@@ -57,7 +57,11 @@ function Card(){
       <div>
         {data.map((item, index) => (
           <div key={index} className="card">
-            <p>{item.status}</p>
+            <span
+              className={`status ${item.status === "모집중" ? "open" : "closed"}`}
+            >
+              {item.status}
+            </span>
             <button>수정</button>
             <button>삭제</button>
             <p>{item.출발} → {item.도착}</p>
