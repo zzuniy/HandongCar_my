@@ -2,6 +2,7 @@ import React, {useEffect , useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 import './Home.css';
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const data = [
   {
@@ -50,29 +51,28 @@ function Home(){
     </>
   );
 };
-
 function Card(){
   return(
-    <>
-      <div>
-        {data.map((item, index) => (
-          <div key={index} className="card">
-            <span
-              className={`status ${item.status === "모집중" ? "open" : "closed"}`}
-            >
-              {item.status}
-            </span>
-            <button>수정</button>
-            <button>삭제</button>
-            <p>{item.출발} → {item.도착}</p>
-            <p>{item.date}</p>
-            <p>{item.member}/4</p>
-            <p>{item.phone}</p>
-            <button>상세보기</button>
+    <div className="cardallign">
+      {data.map((item, index) => (
+        <div key={index} className="card">
+          <span
+            className={`status ${item.status === "모집중" ? "open" : "closed"}`}
+          >
+            {item.status}
+          </span>
+          <div className="card-actions">
+            <button><FaEdit /></button>
+            <button><FaTrash /></button>
           </div>
-        ))}
-      </div>
-    </>
+          <p>{item.출발} → {item.도착}</p>
+          <p>{item.date}</p>
+          <p>{item.member}/4</p>
+          <p>{item.phone}</p>
+          <button>상세보기</button>
+        </div>
+      ))}
+    </div>
   );
 };
 
