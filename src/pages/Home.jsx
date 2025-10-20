@@ -1,6 +1,7 @@
 import React, {useEffect , useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
+import styles from './Home.css';
 
 const data = [
   {
@@ -56,11 +57,15 @@ function Card(){
       <div>
         {data.map((item, index) => (
           <div key={index} className="card">
+            <p>{item.status}</p>
+            <button>수정</button>
+            <button>삭제</button>
             <p>{item.출발}</p>
             <p>to{item.도착}</p>
             <p>{item.member}/4</p>
             <p>{item.date}</p>
             <p>{item.phone}</p>
+            <button>상세보기</button>
           </div>
         ))}
       </div>
