@@ -2,7 +2,7 @@ import React, {useEffect , useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 import './Home.css';
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
 
 const data = [
   {
@@ -56,19 +56,21 @@ function Card(){
     <div className="cardallign">
       {data.map((item, index) => (
         <div key={index} className="card">
-          <span
-            className={`status ${item.status === "모집중" ? "open" : "closed"}`}
-          >
+        <div className="card-header">
+          <span className={`status ${item.status === "모집중" ? "open" : "closed"}`}>
             {item.status}
           </span>
           <div className="card-actions">
             <button><FaEdit /></button>
             <button><FaTrash /></button>
           </div>
-          <p>{item.출발} → {item.도착}</p>
-          <p>{item.date}</p>
-          <p>{item.member}/4</p>
-          <p>{item.phone}</p>
+        </div>
+          <div className="card-info">
+              <p><FaMapMarkerAlt /> {item.출발} → {item.도착}</p>
+              <p><FaRegClock /> {item.date}</p>
+              <p><FaUserFriends /> {item.member}/4</p>
+              <p><FaPhoneAlt /> {item.phone}</p>
+          </div>
           <button>상세보기</button>
         </div>
       ))}
