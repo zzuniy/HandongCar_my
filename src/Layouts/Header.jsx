@@ -1,17 +1,27 @@
 import React from "react";
-import {Link, NavLink } from "react-router-dom";
-import styled from "styled-components";
+import { Link, NavLink } from "react-router-dom";
+import "./Header.css";
 
-const Header = () => {
-  return(
-    <>
-      <header>
-        <div>
-          <Link to='/'>Logo</Link>
-        </div>
-      </header>
-    </>
+function Header() {
+  return (
+    <header className="header">
+      <div className="logo">
+        <Link to="/">🚗 Handong Carpool</Link>
+      </div>
+
+      <nav className="nav">
+        <NavLink to="/" end className="nav-item">
+          홈
+        </NavLink>
+        <NavLink to="/list" end className="nav-item">
+          목록
+        </NavLink>
+        <NavLink to="/add" className="nav-item">
+          추가
+        </NavLink>
+      </nav>
+    </header>
   );
-};
+}
 
 export default Header;
