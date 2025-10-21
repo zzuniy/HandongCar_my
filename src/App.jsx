@@ -5,7 +5,7 @@ import DetailPage from './pages/detail';
 import CreatePage from './pages/create';
 import UpdatePage from './pages/update';
 import MainLayout from './Layouts/MainLayout';
-import "./assets/ui.css";
+import "./assets/dayeon_ui.css";
 
 export default function App() {
   return (
