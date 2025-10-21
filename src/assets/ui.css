@@ -88,3 +88,44 @@ h1{margin:0 0 18px;font-size:24px}
   box-shadow:0 8px 22px rgba(106,90,249,.35);
 }
 .btn-gradient:hover{filter:brightness(1.02)}
+
+/* 전역 박스 사이징 */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+/* 카드 배경을 살짝 더 흐리게(인풋과 구분) */
+.card {
+  background: rgba(255,255,255,.92);  /* 기존 .80 → .92로 */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(230,232,240,.7);
+}
+
+/* 행 2개 레이아웃: flex로 전환 + 간격 키우기 */
+.row-2 {
+  display: flex;                /* grid → flex */
+  gap: 20px;                    /* 간격 확실히 */
+}
+.row-2 > * { flex: 1; }
+
+/* 인풋 대비 강화 (경계선/그림자) */
+.input, .select, .textarea {
+  background: #fff;
+  border: 1px solid #e0e3ef;    /* 조금 더 진한 회색 */
+  box-shadow: 0 1px 0 rgba(0,0,0,.03) inset;
+}
+
+/* 포커스시 경계 강조 */
+.input:focus, .select:focus, .textarea:focus {
+  border-color: #c8ccf5;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(106,90,249,.12);
+}
+
+/* 카드 좌우/상하 여백도 살짝 조정 */
+.page { padding: 56px 20px; }
+.container { max-width: 720px; }
+
+:root { --danger:#c03737; }
+.hint.error { color: var(--danger); }
