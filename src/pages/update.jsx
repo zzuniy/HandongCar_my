@@ -1,76 +1,142 @@
-// src/pages/create.jsx
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createPost } from "../api";
+// src/pages/update.jsx
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { getPost, updatePost } from "../api";
 import styles from "../assets/styles/create&update.module.css";
 
-export default function CreatePage(){
+export default function UpdatePage(){
+  const { id } = useParams();
   const navigate = useNavigate();
+
+  const [form,setForm] = useState(null);
+  const [loading,setLoading] = useState(true);
+  const [loadError,setLoadError] = useState("");
+  const [pwOK,setPwOK] = useState(false);
   const [submitting,setSubmitting] = useState(false);
-  const [form,setForm] = useState({
-    date:"", time:"", start_point:"", destination:"",
-    total_people:1, current_people:0,
-    host_phone:"", total_time:"", status:"모집 중",
-    note:"", password:""
-  });
-  const [errors,setErrors] = useState({start_point:"",destination:"",note:"",password:""});
+  const [errors,setErrors] = useState({start_point:"",destination:"",note:""});
 
   const numericKeys = useMemo(()=>["total_people","current_people"],[]);
-
   const toInt = (v,fb=0)=>Number.isFinite(+v)?+v:fb;
+  const under100 = (s)=> (s?.length??0) < 100;
 
-  const validate = (f)=>{
-    const e={start_point:"",destination:"",note:"",password:""};
-    const under100 = (s)=> (s?.length??0) < 100;  // 100자 '미만'
-    if(!under100(f.start_point)) e.start_point="출발지는 100자 미만이어야 합니다.";
-    if(!under100(f.destination)) e.destination="도착지는 100자 미만이어야 합니다.";
-    if(!under100(f.note)) e.note="비고는 100자 미만이어야 합니다.";
-    if(!f.password) e.password="비밀번호는 필수입니다.";
+  const validate=(draft)=>{
+    const e={start_point:"",destination:"",note:""};
+    if(!under100(draft.start_point)) e.start_point="출발지는 100자 미만이어야 합니다.";
+    if(!under100(draft.destination)) e.destination="도착지는 100자 미만이어야 합니다.";
+    if(!under100(draft.note)) e.note="비고는 100자 미만이어야 합니다.";
     setErrors(e);
-    return !e.start_point && !e.destination && !e.note && !e.password;
+    return !e.start_point && !e.destination && !e.note;
   };
+
+  const askPassword = (pw)=>{
+    const input = window.prompt("이 게시글의 비밀번호를 입력하세요.");
+    if(input===null) return false;
+    if(String(input)===String(pw)) return true;
+    alert("비밀번호가 올바르지 않습니다. 다시 시도하세요.");
+    return askPassword(pw); // 무제한 시도
+  };
+
+  const fetchPost = async()=>{
+    if(!id) return;
+    setLoading(true); setLoadError(""); setPwOK(false);
+
+    try{
+      const {data} = await getPost(id);
+      if(!("password" in data)) throw new Error("PASSWORD_MISSING");
+
+      // 선확인
+      const ok = askPassword(String(data.password));
+      if(!ok){
+        setLoadError("비밀번호 확인이 필요합니다. 아래 버튼으로 다시 시도하세요.");
+        setForm(null);
+        setPwOK(false);
+        return;
+      }
+
+      const safe={
+        id:data.id ?? id,
+        date:data.date ?? "", time:data.time ?? "",
+        start_point:data.start_point ?? "", destination:data.destination ?? "",
+        total_people:toInt(data.total_people,1),
+        current_people:toInt(data.current_people,0),
+        host_phone:data.host_phone ?? "", total_time:data.total_time ?? "",
+        status:data.status ?? "모집 중",
+        note:data.note ?? "",
+      };
+      setForm(safe); setPwOK(true); validate(safe);
+    }catch(err){
+      const st = err?.response?.status;
+      setLoadError( err?.message==="PASSWORD_MISSING" ? "비밀번호 필드가 없는 게시글입니다. 데이터 규칙을 확인하세요."
+                  : st===404 ? "해당 ID의 게시글이 없습니다. (404)" : "게시글을 불러올 수 없습니다." );
+      console.error("[GET ERROR]",st,err?.message,err?.response?.data);
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  useEffect(()=>{ fetchPost(); /* eslint-disable-next-line */ },[id]);
 
   const onChange=(e)=>{
     const {name,value}=e.target;
-    setForm((prev)=>{
-      const draft={...prev,[name]: numericKeys.includes(name)? (value===""?"":toInt(value,0)) : value};
-      if(["start_point","destination","note","password"].includes(name)) validate(draft);
+    setForm((f)=>{
+      const draft={...f,[name]: numericKeys.includes(name)? (value===""?"":toInt(value,0)) : value};
+      if(["start_point","destination","note"].includes(name)) validate(draft);
       return draft;
     });
   };
 
   const onSubmit=async(e)=>{
     e.preventDefault();
-    if(!validate(form)) { alert("입력값을 확인하세요."); return; }
+    if(!pwOK) { alert("먼저 비밀번호를 확인하세요."); return; }
+    if(!form) return;
 
-    const total = toInt(form.total_people,1);
-    const curr  = toInt(form.current_people,0);
+    if(!validate(form)){ alert("입력값을 확인하세요."); return; }
+
+    const total=toInt(form.total_people,1);
+    const curr =toInt(form.current_people,0);
     if(curr>total){ alert("현재 인원이 정원을 초과했습니다."); return; }
 
-    const next={
-      ...form,
-      total_people: total,
-      current_people: curr,
-      status: curr>=total? "마감": (form.status || "모집 중"),
+    const next={ ...form, total_people:total, current_people:curr,
+      status: curr>=total? "마감": (form.status || "모집 중")
     };
 
     try{
       setSubmitting(true);
-      const {data} = await createPost(next);
-      alert("등록 완료!");
-      navigate(`/detail/${data?.id ?? ""}`, { replace:true });
+      await updatePost(form.id ?? id, next);
+      alert("수정 완료!");
+      navigate(`/detail/${form.id ?? id}`,{replace:true});
     }catch(err){
-      console.error("[POST ERROR]",err?.response?.status,err?.message,err?.response?.data);
-      alert("등록에 실패했습니다.");
+      console.error("[PUT ERROR]",err?.response?.status,err?.message,err?.response?.data);
+      alert("수정에 실패했습니다.");
     }finally{
       setSubmitting(false);
     }
   };
 
+  if(loading){
+    return <PageShell><div className={styles.card}>로딩 중…</div></PageShell>;
+  }
+  if(loadError){
+    return (
+      <PageShell>
+        <div className={styles.card} style={{gap:12}}>
+          <p style={{margin:0}}>{loadError}</p>
+          <div className={styles.actions}>
+            <button className={`${styles.button} ${styles.btnGradient}`} onClick={fetchPost}>비밀번호 다시 시도</button>
+            <button className={styles.button} onClick={()=>navigate(-1)}>뒤로가기</button>
+          </div>
+        </div>
+      </PageShell>
+    );
+  }
+  if(!form || !pwOK){
+    return <PageShell><div className={styles.card}>비밀번호 확인이 필요합니다.</div></PageShell>;
+  }
+
   return (
     <PageShell>
       <div className={styles.card}>
-        <h1>같이카 등록</h1>
+        <h1>같이카 수정</h1>
 
         <form className={styles.form} onSubmit={onSubmit} noValidate>
           {/* 날짜/시간 */}
@@ -145,16 +211,9 @@ export default function CreatePage(){
             {errors.note && <p className={styles.error}>{errors.note}</p>}
           </div>
 
-          {/* 비밀번호 */}
-          <div className={styles.field}>
-            <label htmlFor="password" className={styles.label}>비밀번호 (필수)</label>
-            <input id="password" className={styles.input} type="password" name="password" value={form.password} onChange={onChange} disabled={submitting}/>
-            {errors.password && <p className={styles.error}>{errors.password}</p>}
-          </div>
-
           <div className={styles.actions}>
             <button className={`${styles.button} ${styles.btnGradient}`} type="submit" disabled={submitting}>
-              {submitting ? "등록 중…" : "등록 하기"}
+              {submitting ? "수정 중…" : "수정 하기"}
             </button>
           </div>
         </form>
