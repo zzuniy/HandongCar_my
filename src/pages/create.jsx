@@ -85,15 +85,11 @@ export default function CreatePage(){
             </div>
           </div>
 
-          {/* 닉네임(호스트/신청자) */}
+          {/* 닉네임(호스트) */}
           <div className={styles.row2}>
             <div className={styles.field}>
               <label htmlFor="host_nickname" className={styles.label}>닉네임</label>
               <input id="host_nickname" className={styles.input} name="host_nickname" value={form.host_nickname} onChange={onChange} maxLength={30} disabled={submitting}/>
-            </div>
-            <div className={styles.field}>
-              <label htmlFor="participant_nickname" className={styles.label}>신청자 닉네임</label>
-              <input id="participant_nickname" className={styles.input} name="participant_nickname" value={form.participant_nickname} onChange={onChange} maxLength={30} disabled={submitting}/>
             </div>
           </div>
 
