@@ -12,29 +12,36 @@ export default function CreatePage(){
     total_people:1, current_people:0,
     host_phone:"", total_time:"", status:"모집 중",
     note:"", password:"",
-    host_nickname:"",          // ✅ 추가: 호스트 닉네임
+    host_nickname:"" // ✅ 호스트 닉네임만 사용
   });
-  const [errors,setErrors] = useState({start_point:"",destination:"",note:"",password:""});
+  const [errors,setErrors] = useState({
+    start_point:"",destination:"",note:"",password:"",
+    host_nickname:""
+  });
 
   const numericKeys = useMemo(()=>["total_people","current_people"],[]);
   const toInt = (v,fb=0)=>Number.isFinite(+v)?+v:fb;
 
   const validate = (f)=>{
-    const e={start_point:"",destination:"",note:"",password:""};
-    const under100 = (s)=> (s?.length??0) < 100;  // 100자 '미만'
+    const e={start_point:"",destination:"",note:"",password:"",host_nickname:""};
+    const under100 = (s)=> (s?.length??0) < 100;   // 100자 '미만'
+    const nickUnder10 = (s)=> (s?.length??0) < 10; // 10자 '미만'
+
     if(!under100(f.start_point)) e.start_point="출발지는 100자 미만이어야 합니다.";
     if(!under100(f.destination)) e.destination="도착지는 100자 미만이어야 합니다.";
     if(!under100(f.note)) e.note="비고는 100자 미만이어야 합니다.";
     if(!f.password) e.password="비밀번호는 필수입니다.";
+    if(f.host_nickname && !nickUnder10(f.host_nickname)) e.host_nickname="호스트 닉네임은 10자 미만이어야 합니다.";
+
     setErrors(e);
-    return !e.start_point && !e.destination && !e.note && !e.password;
+    return Object.values(e).every(v=>!v);
   };
 
   const onChange=(e)=>{
     const {name,value}=e.target;
     setForm((prev)=>{
       const draft={...prev,[name]: numericKeys.includes(name)? (value===""?"":toInt(value,0)) : value};
-      if(["start_point","destination","note","password"].includes(name)) validate(draft);
+      if(["start_point","destination","note","password","host_nickname"].includes(name)) validate(draft);
       return draft;
     });
   };
@@ -85,12 +92,20 @@ export default function CreatePage(){
             </div>
           </div>
 
-          {/* 닉네임(호스트) */}
-          <div className={styles.row2}>
-            <div className={styles.field}>
-              <label htmlFor="host_nickname" className={styles.label}>닉네임</label>
-              <input id="host_nickname" className={styles.input} name="host_nickname" value={form.host_nickname} onChange={onChange} maxLength={30} disabled={submitting}/>
-            </div>
+          {/* 호스트 닉네임 */}
+          <div className={styles.field}>
+            <label htmlFor="host_nickname" className={styles.label}>호스트 닉네임 (10자 미만)</label>
+            <input
+              id="host_nickname"
+              className={styles.input}
+              name="host_nickname"
+              value={form.host_nickname}
+              onChange={onChange}
+              maxLength={10} // 입력은 10까지 가능하나, '미만' 검증으로 10은 에러 처리
+              disabled={submitting}
+            />
+            <span className={styles.counter}>{form.host_nickname.length}/10</span>
+            {errors.host_nickname && <p className={styles.error}>{errors.host_nickname}</p>}
           </div>
 
           {/* 출발지 */}
