@@ -8,7 +8,6 @@ const INIT = {
   total_people: 1,
   host_phone: "",
   note: "",
-  password: "",
   current_people: 0,
   status: "모집 중",
   total_time: "",
@@ -18,6 +17,9 @@ const INIT = {
 
 export default function CreatePage(){
   const [form, setForm] = useState(INIT);
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [err, setErr] = useState("");
   const nav = useNavigate();
 
   const onChange = (e) => {
@@ -28,27 +30,26 @@ export default function CreatePage(){
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setErr("");
 
     // 필수값 체크
     const req = ["date","time","start_point","destination","total_people","host_phone"];
     const miss = req.filter(k => !String(form[k]).trim());
-    if (miss.length){
-      alert("필수 항목을 모두 입력하세요.");
-      return;
-    }
+    if (miss.length) return setErr("필수 항목을 모두 입력하세요.");
 
-    try{
-      const res = await createPost(form);
+    // 비밀번호 규칙
+    if (!pw.trim()) return setErr("비밀번호를 입력하세요.");
+    if (pw.length < 4 || pw.length > 12) return setErr("비밀번호는 4~12자입니다.");
+    if (pw !== pw2) return setErr("비밀번호가 일치하지 않습니다.");
+
+    const payload = { ...form, password: pw };
+
+    try {
+      const res = await createPost(payload);
       const newId = res?.data?.id;
-      if(!newId){
-        console.error("[Create] No id in response:", res);
-        alert("생성은 되었지만 ID를 확인하지 못했습니다.");
-        return;
-      }
-      alert(`생성 완료${form.password ? " (비밀번호 설정됨)" : ""}.`);
-      // ⚠️ 여기서 임의로 1 같은 값 넣지 말고, 서버가 준 id 사용!
-      nav(`/update/${newId}`);
-    }catch(err){
+      alert("생성 완료. 비밀번호가 설정되었습니다.");
+      if (newId) nav(`/update/${newId}`);
+    } catch (err) {
       console.error("[POST ERROR]", err?.config?.baseURL + err?.config?.url, err?.response?.status, err?.response?.data);
       alert("생성에 실패했습니다. 콘솔을 확인하세요.");
     }
@@ -59,48 +60,17 @@ export default function CreatePage(){
       <div className="container">
         <div className="card">
           <h1>같이카 생성</h1>
+
           <form className="form" onSubmit={onSubmit}>
             <div className="row-2">
-              {/* input type을 명확히: 날짜/시간 */}
-              <input
-                className="input"
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={onChange}
-                placeholder="YYYY-MM-DD"
-              />
-              <input
-                className="input"
-                type="time"
-                name="time"
-                value={form.time}
-                onChange={onChange}
-                placeholder="HH:mm"
-              />
+              <input className="input" type="date" name="date" value={form.date} onChange={onChange} />
+              <input className="input" type="time" name="time" value={form.time} onChange={onChange} />
             </div>
 
-            <input
-              className="input"
-              name="start_point"
-              placeholder="출발지 (예: 한동대 정문)"
-              value={form.start_point}
-              onChange={onChange}
-            />
-            <input
-              className="input"
-              name="destination"
-              placeholder="도착지 (예: 포항역)"
-              value={form.destination}
-              onChange={onChange}
-            />
+            <input className="input" name="start_point" placeholder="출발지 (예: 한동대 정문)" value={form.start_point} onChange={onChange} />
+            <input className="input" name="destination" placeholder="도착지 (예: 포항역)" value={form.destination} onChange={onChange} />
 
-            <select
-              className="select"
-              name="total_people"
-              value={form.total_people}
-              onChange={onChange}
-            >
+            <select className="select" name="total_people" value={form.total_people} onChange={onChange}>
               <option value={1}>1명</option>
               <option value={2}>2명</option>
               <option value={3}>3명</option>
@@ -108,29 +78,26 @@ export default function CreatePage(){
             </select>
             <div className="hint">* 전체 인원은 최대 4명까지 가능합니다.</div>
 
+            <input className="input" name="host_phone" placeholder="연락처 (예: 010-1234-5678)" value={form.host_phone} onChange={onChange} />
+            <textarea className="textarea" name="note" placeholder="적재 여부/특이 사항" value={form.note} onChange={onChange} />
+
+            {/* 비밀번호(필수) + 확인 */}
             <input
               className="input"
-              name="host_phone"
-              placeholder="연락처 (예: 010-1234-5678)"
-              value={form.host_phone}
-              onChange={onChange}
+              type="password"
+              placeholder="수정 비밀번호 (필수, 4~12자)"
+              value={pw}
+              onChange={(e)=>setPw(e.target.value)}
             />
-
-            <textarea
-              className="textarea"
-              name="note"
-              placeholder="적재 여부/특이 사항"
-              value={form.note}
-              onChange={onChange}
-            />
-
             <input
               className="input"
-              name="password"
-              placeholder="수정 비밀번호(선택)"
-              value={form.password}
-              onChange={onChange}
+              type="password"
+              placeholder="비밀번호 확인"
+              value={pw2}
+              onChange={(e)=>setPw2(e.target.value)}
             />
+
+            {err && <div className="hint" style={{color:"#c03737"}}>{err}</div>}
 
             <div className="actions">
               <button className="button btn-gradient" type="submit">생성 하기</button>

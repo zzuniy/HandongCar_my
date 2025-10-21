@@ -129,3 +129,11 @@ h1{margin:0 0 18px;font-size:24px}
 
 :root { --danger:#c03737; }
 .hint.error { color: var(--danger); }
+
+body{
+  /* 기존 background 지우고 아래로 교체 */
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #dde0ec, #d6d9e8 55%, #ced2e3 100%);
+}
+
+.card{ border-color: rgba(210,214,232,.85); }
