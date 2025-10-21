@@ -1,43 +1,43 @@
-import React, {useEffect , useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 
 import './Home.css';
-import { FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
+import { FaEdit, FaTrash, FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt } from "react-icons/fa";
 
+import { Link } from "react-router-dom";
 
-
-function Home(){
+function Home() {
   const [data, setData] = useState([]);
 
-    useEffect(() => {
+  useEffect(() => {
     fetch("https://68f63d016b852b1d6f169327.mockapi.io/posts")
       .then((res) => res.json())
       .then((result) => setData(result))
       .catch((err) => console.error("API 불러오기 오류:", err));
   }, []);
-  return(
+  return (
     <>
-        <div className="recruit-text">
-          <h1>카풀 모집</h1>
-          <p className = "with-text">함께 이용할 동승자를 찾아보세요</p>
-        </div>
-      <div className="addallign">
-        <input type="text" className="search"placeholder="검색"></input>
-        <button className="addcar">+ 게시글 추가</button>
+      <div className="recruit-text">
+        <h1>카풀 모집</h1>
+        <p className="with-text">함께 이용할 동승자를 찾아보세요</p>
       </div>
-   
-      <br/>
-  
-     <Card data={data}/>
+      <div className="addallign">
+        <input type="text" className="search" placeholder="검색"></input>
+        <Link to="/create" className="addcar as-button">+ 게시글 추가</Link>
+      </div>
+
+      <br />
+
+      <Card data={data} />
     </>
   );
 };
 
-function Card({data}){
-    if (!Array.isArray(data)) return null; 
-    
-  return(
+function Card({ data }) {
+  if (!Array.isArray(data)) return null;
+
+  return (
     <div className="cardallign">
       {data.map((item, index) => (
         <div key={index} className="card">
