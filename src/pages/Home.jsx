@@ -9,12 +9,6 @@ import { FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  
 function Home(){
   const [data, setData] = useState([]);
 
-    useEffect(() => {
-    fetch("https://68f63d016b852b1d6f169327.mockapi.io/posts")
-      .then((res) => res.json())
-      .then((result) => setData(result))
-      .catch((err) => console.error("API 불러오기 오류:", err));
-  }, []);
 
   return(
     <>
