@@ -5,10 +5,17 @@ import "./Header.css";
 function Header() {
   return (
     <header className="header">
+
       <div className="logo">
-        <Link to="/">🚗 Handong Carpool</Link>
+        <Link to="/" className="logo-link">
+          <div className="logo-icon-bg">
+            <i className="fa-solid fa-car"></i>
+          </div>
+          <span className="logo-text">한동카</span>
+        </Link>
       </div>
 
+   
       <nav className="nav">
         <NavLink to="/" end className="nav-item">
           홈

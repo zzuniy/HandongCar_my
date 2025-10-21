@@ -1,0 +1,11 @@
+.footer {
+  background-color: #f8f9fa;
+  color: #555;
+  text-align: center;
+  padding: 15px 0;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+  font-family: "Pretendard", sans-serif;
+  width: 100%;
+  margin-top: 40px;
+}
