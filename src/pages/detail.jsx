@@ -137,6 +137,18 @@ const Contact = styled.a`
   }
 `;
 
+function Infomation() {
+  return (
+    <InfoItem>
+      <InfoIcon>아이콘</InfoIcon>
+      <InfoText>
+        <InfoTitle>출발지</InfoTitle>
+        <InfoContents>서울역</InfoContents>
+      </InfoText>
+    </InfoItem>
+  )
+}
+
 function UserSection() {
   return (
     <UserSectionWrapper>
@@ -146,7 +158,6 @@ function UserSection() {
           <UserName>김민수</UserName>
         </InfoContents>
       </UserLeft>
-
       <Contact href="tel:01012345678">010-1234-5678</Contact>
     </UserSectionWrapper>
   );
@@ -159,45 +170,23 @@ function DetailPage() {
         <LeftPage>
           <Container>
             <CurrentSituation>모집중</CurrentSituation>
-
+            <SubTitle>모집 정보</SubTitle>
             <InfoGrid>
-              <InfoItem>
-                <InfoIcon>아이콘</InfoIcon>
-                <InfoText>
-                  <InfoTitle>출발지</InfoTitle>
-                  <InfoContents>서울역</InfoContents>
-                </InfoText>
-              </InfoItem>
-
-              <InfoItem>
-                <InfoIcon>아이콘A</InfoIcon>
-                <InfoText>
-                  <InfoTitle>도착지</InfoTitle>
-                  <InfoContents>부산역</InfoContents>
-                </InfoText>
-              </InfoItem>
-
-              <InfoItem>
-                <InfoIcon>아이콘B</InfoIcon>
-                <InfoText>
-                  <InfoTitle>출발일시</InfoTitle>
-                  <InfoContents>2024년 1월 15일 오전 9:00</InfoContents>
-                </InfoText>
-              </InfoItem>
-
-              <InfoItem>
-                <InfoIcon>아이콘C</InfoIcon>
-                <InfoText>
-                  <InfoTitle>모집 인원</InfoTitle>
-                  <InfoContents>3명(잔여 1명)</InfoContents>
-                </InfoText>
-              </InfoItem>
+              <Infomation />
+              <Infomation />
+              <Infomation />
+              <Infomation />
             </InfoGrid>
+
+            <SubTitle>호스트 정보</SubTitle>
+            <UserSection />
           </Container>
 
           <Container>
-            <SubTitle>호스트 정보</SubTitle>
-            <UserSection></UserSection>
+            <SubTitle>참여자 목록</SubTitle>
+            <UserSection />
+            <UserSection />
+            <UserSection />
           </Container>
 
 
