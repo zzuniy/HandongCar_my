@@ -11,12 +11,12 @@ export default function CreatePage(){
     date:"", time:"", start_point:"", destination:"",
     total_people:1, current_people:0,
     host_phone:"", total_time:"", status:"모집 중",
-    note:"", password:""
+    note:"", password:"",
+    host_nickname:"",          // ✅ 추가: 호스트 닉네임
   });
   const [errors,setErrors] = useState({start_point:"",destination:"",note:"",password:""});
 
   const numericKeys = useMemo(()=>["total_people","current_people"],[]);
-
   const toInt = (v,fb=0)=>Number.isFinite(+v)?+v:fb;
 
   const validate = (f)=>{
@@ -82,6 +82,18 @@ export default function CreatePage(){
             <div className={styles.field}>
               <label htmlFor="time" className={styles.label}>시간</label>
               <input id="time" className={styles.input} type="time" name="time" value={form.time} onChange={onChange} disabled={submitting}/>
+            </div>
+          </div>
+
+          {/* 닉네임(호스트/신청자) */}
+          <div className={styles.row2}>
+            <div className={styles.field}>
+              <label htmlFor="host_nickname" className={styles.label}>닉네임</label>
+              <input id="host_nickname" className={styles.input} name="host_nickname" value={form.host_nickname} onChange={onChange} maxLength={30} disabled={submitting}/>
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="participant_nickname" className={styles.label}>신청자 닉네임</label>
+              <input id="participant_nickname" className={styles.input} name="participant_nickname" value={form.participant_nickname} onChange={onChange} maxLength={30} disabled={submitting}/>
             </div>
           </div>
 
