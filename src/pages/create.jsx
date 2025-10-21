@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createPost } from "../api";
 import { useNavigate } from "react-router-dom";
-import styles from "../assets/styles/dayeon.module.css";
+import styles from "../assets/styles/create&update.module.css";
 
 const INIT = {
   date:"", time:"",
