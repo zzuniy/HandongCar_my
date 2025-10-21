@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
+import Join from "../components/modals/joinModal";
 
 const PageWrap = styled.div`
   display: flex;
@@ -22,6 +23,8 @@ const RightPage = styled.div`
   width: 100%;
 `;
 
+// ================ 연속적으로 쓰일 상자 =================
+
 const Container = styled.section`
   background: #fff;
   border: 1px solid #e8e8ec;
@@ -29,6 +32,8 @@ const Container = styled.section`
   padding: 10%;
   box-shadow: 0 2px 10px rgba(18, 18, 23, 0.04);
 `;
+
+// ================ 모집 현황 =================
 
 const CurrentSituation = styled.div`
   display: flex;
@@ -90,6 +95,18 @@ const SubTitle = styled.h2`
 `;
 
 
+function Infomation() {
+  return (
+    <InfoItem>
+      <InfoIcon>아이콘</InfoIcon>
+      <InfoText>
+        <InfoTitle>출발지</InfoTitle>
+        <InfoContents>서울역</InfoContents>
+      </InfoText>
+    </InfoItem>
+  )
+}
+
 // ========== 사용자 정보 컨테이너 ==========
 
 const UserIcon = styled.img`
@@ -121,33 +138,13 @@ const UserName = styled.span`
   color: #1a1a1a;
 `;
 
-const UserSubInfo = styled.span`
-  font-size: 12px;
-  color: #6e6e73;
-`;
-
-const Contact = styled.a`
+const Contact = styled.span`
   font-weight: 700;
   font-size: 15px;
   color: #111;
   text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
 `;
 
-function Infomation() {
-  return (
-    <InfoItem>
-      <InfoIcon>아이콘</InfoIcon>
-      <InfoText>
-        <InfoTitle>출발지</InfoTitle>
-        <InfoContents>서울역</InfoContents>
-      </InfoText>
-    </InfoItem>
-  )
-}
 
 function UserSection() {
   return (
@@ -158,9 +155,75 @@ function UserSection() {
           <UserName>김민수</UserName>
         </InfoContents>
       </UserLeft>
-      <Contact href="tel:01012345678">010-1234-5678</Contact>
+      <Contact>010-1234-5678</Contact>
     </UserSectionWrapper>
   );
+}
+
+// ========== 신청 상자 ==========
+const PriceCard = styled(Container)`            
+  position: sticky;
+  top: 24px;
+  max-width: 360px;
+  width: 100%;
+`;
+
+const SeatsRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0 8px;
+  font-size: 14px;
+`;
+
+const ProgressTrack = styled.div`
+  height: 8px;
+  border-radius: 999px;
+  background: #e8eaf0;
+  overflow: hidden;
+`;
+
+const ProgressBar = styled.div`
+  height: 100%;
+  width: ${(p) => p.percent}%;
+  background: #2a62ff;
+  transition: width 0.3s ease;
+`;
+
+const ApplyBtn = styled.button`
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #2a62ff;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+`;
+
+function ApplyContainer() {
+  const percent = ( 2 / 4 )*100;
+
+  return (
+    
+    <>
+      <PriceCard>
+        <SubTitle>15000원</SubTitle>
+        <InfoTitle>1인당 요금</InfoTitle>
+
+        <SeatsRow>
+          <span>잔여좌석</span>
+          <span>2석</span>
+        </SeatsRow>
+        <ProgressTrack>
+          <ProgressBar percent={percent}/>
+        </ProgressTrack>
+
+        <ApplyBtn>신청하기</ApplyBtn>
+      </PriceCard>
+    </>
+  )
 }
 
 function DetailPage() {
@@ -189,10 +252,9 @@ function DetailPage() {
             <UserSection />
           </Container>
 
-
         </LeftPage>
         <RightPage>
-
+          <ApplyContainer/>
         </RightPage>
       </PageWrap>
     </>
