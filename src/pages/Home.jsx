@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 
 import './Home.css';
-import { FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
+import { FaUser,FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
 
 
 
@@ -52,10 +52,11 @@ function Card({data}){
           </div>
 
           <div className="card-info">
+            <p><FaUser /> {item.host_nickname}</p>
             <p><FaMapMarkerAlt /> {item.start_point} → {item.destination}</p>
             <p><FaRegClock /> {item.date} {item.time}</p>
             <p><FaUserFriends /> {item.current_people}/{item.total_people}</p>
-            <p><FaPhoneAlt /> {item.host_phone}</p>
+            
           </div>
 
           <button className="detail">상세보기</button>
