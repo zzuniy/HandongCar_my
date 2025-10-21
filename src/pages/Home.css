@@ -148,3 +148,8 @@ margin-bottom: 0;
   display: inline-block;
   text-decoration: none;
 }
+
+.detail {
+  text-decoration: none; /* 밑줄 제거 */
+  color: inherit;        /* 글자색 상속 */
+}
