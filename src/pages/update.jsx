@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getPost, updatePost } from "../api";
 import { useParams } from "react-router-dom";
+import styles from "../assets/styles/dayeon.module.css";
 
 export default function UpdatePage(){
   const { id } = useParams();
@@ -27,7 +28,7 @@ export default function UpdatePage(){
 
   const checkPw = () => {
     if (!form?.password) {
-      alert("이 게시글에 비밀번호가 없습니다. (정책상 없어야 함)");
+      alert("이 게시글에 비밀번호가 없습니다.");
       return;
     }
     if (pwInput === form.password) {
@@ -46,8 +47,16 @@ export default function UpdatePage(){
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!pwOK) return alert("먼저 비밀번호를 확인하세요.");
+    if (form.current_people > form.total_people) {
+      alert("현재 인원이 정원을 초과했습니다.");
+      return;
+    }
+    const next = {
+      ...form,
+      status: form.current_people >= form.total_people ? "마감" : form.status,
+    };
     try {
-      await updatePost(id, form);
+      await updatePost(id, next);
       alert("수정 완료!");
     } catch (err) {
       console.error("[PUT ERROR]", err?.config?.baseURL + err?.config?.url, err?.response?.status, err?.response?.data);
@@ -57,23 +66,22 @@ export default function UpdatePage(){
 
   if (loading || !form)
     return (
-      <div className="page">
-        <div className="container">
-          <div className="card">로딩 중…</div>
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.card}>로딩 중…</div>
         </div>
       </div>
     );
 
   return (
-    <div className="page">
-      <div className="container">
-        <div className="card">
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.card}>
           <h1>같이카 수정</h1>
 
-          {/* 비밀번호 확인 바 */}
-          <div className="row-2" style={{ alignItems: "center" }}>
+          <div className={styles.row2} style={{ alignItems: "center" }}>
             <input
-              className="input"
+              className={styles.input}
               type="password"
               placeholder="비밀번호 입력"
               value={pwInput}
@@ -81,7 +89,7 @@ export default function UpdatePage(){
             />
             <button
               type="button"
-              className="button btn-gradient"
+              className={`${styles.button} ${styles.btnGradient}`}
               onClick={checkPw}
               disabled={pwOK}
             >
@@ -89,33 +97,32 @@ export default function UpdatePage(){
             </button>
           </div>
 
-          <form className="form" onSubmit={onSubmit}>
-            <div className="row-2">
-              <input className="input" type="date" name="date" value={form.date || ""} onChange={onChange} disabled={!pwOK}/>
-              <input className="input" type="time" name="time" value={form.time || ""} onChange={onChange} disabled={!pwOK}/>
+          <form className={styles.form} onSubmit={onSubmit}>
+            <div className={styles.row2}>
+              <input className={styles.input} type="date" name="date" value={form.date || ""} onChange={onChange} disabled={!pwOK}/>
+              <input className={styles.input} type="time" name="time" value={form.time || ""} onChange={onChange} disabled={!pwOK}/>
             </div>
 
-            <input className="input" name="start_point" value={form.start_point || ""} onChange={onChange} disabled={!pwOK}/>
-            <input className="input" name="destination" value={form.destination || ""} onChange={onChange} disabled={!pwOK}/>
+            <input className={styles.input} name="start_point" value={form.start_point || ""} onChange={onChange} disabled={!pwOK}/>
+            <input className={styles.input} name="destination" value={form.destination || ""} onChange={onChange} disabled={!pwOK}/>
 
-            <select className="select" name="total_people" value={form.total_people ?? 1} onChange={onChange} disabled={!pwOK}>
-              <option value={1}>1명</option>
-              <option value={2}>2명</option>
-              <option value={3}>3명</option>
-              <option value={4}>4명</option>
+            <select className={styles.select} name="total_people" value={form.total_people ?? 1} onChange={onChange} disabled={!pwOK}>
+              <option value={1}>1명</option><option value={2}>2명</option>
+              <option value={3}>3명</option><option value={4}>4명</option>
             </select>
 
-            <input className="input" type="number" min="0" name="current_people" value={form.current_people ?? 0} onChange={onChange} disabled={!pwOK}/>
-            <input className="input" name="host_phone" value={form.host_phone || ""} onChange={onChange} disabled={!pwOK}/>
-            <input className="input" name="total_time" value={form.total_time || ""} onChange={onChange} disabled={!pwOK}/>
-            <select className="select" name="status" value={form.status || "모집 중"} onChange={onChange} disabled={!pwOK}>
-              <option>모집 중</option>
-              <option>마감</option>
+            <input className={styles.input} type="number" min="0" name="current_people" value={form.current_people ?? 0} onChange={onChange} disabled={!pwOK}/>
+            <input className={styles.input} name="host_phone" value={form.host_phone || ""} onChange={onChange} disabled={!pwOK}/>
+            <input className={styles.input} name="total_time" value={form.total_time || ""} onChange={onChange} disabled={!pwOK}/>
+            <select className={styles.select} name="status" value={form.status || "모집 중"} onChange={onChange} disabled={!pwOK}>
+              <option>모집 중</option><option>마감</option>
             </select>
-            <textarea className="textarea" name="note" value={form.note || ""} onChange={onChange} disabled={!pwOK}/>
+            <textarea className={styles.textarea} name="note" value={form.note || ""} onChange={onChange} disabled={!pwOK}/>
 
-            <div className="actions">
-              <button className="button btn-gradient" type="submit" disabled={!pwOK}>수정 하기</button>
+            <div className={styles.actions}>
+              <button className={`${styles.button} ${styles.btnGradient}`} type="submit" disabled={!pwOK}>
+                수정 하기
+              </button>
             </div>
           </form>
         </div>
