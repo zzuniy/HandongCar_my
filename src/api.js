@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const baseURL = import.meta?.env?.VITE_API_BASE || "https://68f63d016b852b1d6f169327.mockapi.io";
-export const api = axios.create({ baseURL, headers: { "Content-Type": "application/json" } });
+// ✅ CRA에서는 process.env로 접근
+const baseURL = process.env.REACT_APP_API_BASE || "https://68f63d016b852b1d6f169327.mockapi.io";export const api = axios.create({ baseURL, headers: { "Content-Type": "application/json" } });
 
 // posts
 export const createPost = (data) => api.post("/posts", data);
