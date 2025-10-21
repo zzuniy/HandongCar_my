@@ -44,7 +44,6 @@ export default function UpdatePage(){
       const {data} = await getPost(id);
       if(!("password" in data)) throw new Error("PASSWORD_MISSING");
 
-      // 선확인
       const ok = askPassword(String(data.password));
       if(!ok){
         setLoadError("비밀번호 확인이 필요합니다. 아래 버튼으로 다시 시도하세요.");
@@ -62,6 +61,7 @@ export default function UpdatePage(){
         host_phone:data.host_phone ?? "", total_time:data.total_time ?? "",
         status:data.status ?? "모집 중",
         note:data.note ?? "",
+        host_nickname: data.host_nickname ?? "",          // ✅ 추가
       };
       setForm(safe); setPwOK(true); validate(safe);
     }catch(err){
@@ -148,6 +148,14 @@ export default function UpdatePage(){
             <div className={styles.field}>
               <label htmlFor="time" className={styles.label}>시간</label>
               <input id="time" className={styles.input} type="time" name="time" value={form.time} onChange={onChange} disabled={submitting}/>
+            </div>
+          </div>
+
+          {/* 닉네임(호스트) */}
+          <div className={styles.row2}>
+            <div className={styles.field}>
+              <label htmlFor="host_nickname" className={styles.label}>호스트 닉네임</label>
+              <input id="host_nickname" className={styles.input} name="host_nickname" value={form.host_nickname} onChange={onChange} maxLength={30} disabled={submitting}/>
             </div>
           </div>
 
