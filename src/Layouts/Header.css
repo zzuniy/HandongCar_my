@@ -1,0 +1,40 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  color: white;
+  padding: 14px 40px;
+  font-family: "Pretendard", sans-serif;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logo a {
+  color: rgb(20, 20, 20);
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.nav {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-item {
+  color: rgb(30, 30, 30);
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.nav-item:hover {
+  color: #1abc9c;
+}
+
+.nav-item.active {
+  font-weight: bold;
+  border-bottom: 2px solid #1abc9c;
+}
+body {
+  margin: 0;
+}
