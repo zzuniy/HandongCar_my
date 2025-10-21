@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getPost, updatePost } from "../api";
 import { useParams } from "react-router-dom";
-import styles from "../assets/styles/dayeon.module.css";
+import styles from "../assets/styles/create&update.module.css";
 
 export default function UpdatePage(){
   const { id } = useParams();
