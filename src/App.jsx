@@ -15,7 +15,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/detail" element={<DetailPage />} />
             <Route path="/create" element={<CreatePage />} />
-            <Route path="/update" element={<UpdatePage />} />
+            <Route path="/update/:id" element={<UpdatePage />} />
             
           </Route>
         </Routes>
