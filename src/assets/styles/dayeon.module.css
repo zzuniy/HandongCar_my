@@ -1,0 +1,119 @@
+/* src/assets/styles/create&update.module.css */
+
+/* 전체 요소 크기 계산을 border-box 기준으로 통일 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ===== 페이지 공통 구조 ===== */
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 7vh 3vw;
+  background: radial-gradient(60vw 30vh at 50% -10%, #dde0ec, #d6d9e8 55%, #ced2e3 100%);
+}
+
+/* 이하 그대로 */
+.container {
+  width: 100%;
+  max-width: 70vw;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(0.8vw);
+  -webkit-backdrop-filter: blur(0.8vw);
+  border: 0.1vw solid rgba(230, 232, 240, 0.7);
+  border-radius: 1.2vw;
+  box-shadow: 0 1vw 3vw rgba(22, 24, 35, 0.08);
+  padding: 3vw;
+}
+
+h1 {
+  margin: 0 0 2vh;
+  font-size: 2.2vw;
+}
+
+.form {
+  display: grid;
+  gap: 2vh;
+}
+
+.row2 {
+  display: flex;
+  gap: 2vw;
+}
+.row2 > * {
+  flex: 1;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  border: 0.1vw solid #e0e3ef;
+  border-radius: 1vw;
+  padding: 1.2vh 1vw;
+  font-size: 1.1vw;
+  background: #fff;
+  outline: none;
+  box-shadow: 0 0.1vw 0 rgba(0, 0, 0, 0.03) inset;
+}
+
+.textarea {
+  min-height: 12vh;
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #b6b8c3;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: #c8ccf5;
+  box-shadow: 0 0 0 0.5vw rgba(106, 90, 249, 0.12);
+  outline: 0;
+}
+
+.hint {
+  font-size: 0.9vw;
+  color: #666;
+}
+.hintError {
+  color: #c03737;
+}
+
+.actions {
+  margin-top: 2vh;
+}
+
+.button {
+  width: 100%;
+  border: none;
+  border-radius: 1vw;
+  padding: 1.5vh;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.03s ease, filter 0.15s ease;
+}
+
+.button:active {
+  transform: translateY(0.2vh);
+}
+
+.btnGradient {
+  background: linear-gradient(135deg, #6a5af9, #b66bff);
+  box-shadow: 0 1vw 2vw rgba(106, 90, 249, 0.35);
+}
+
+.btnGradient:hover {
+  filter: brightness(1.02);
+}
