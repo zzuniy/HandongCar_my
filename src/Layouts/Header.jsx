@@ -11,6 +11,9 @@ function Header() {
 
       <nav className="nav">
         <NavLink to="/" end className="nav-item">
+          홈
+        </NavLink>
+        <NavLink to="/list" end className="nav-item">
           목록
         </NavLink>
         <NavLink to="/add" className="nav-item">

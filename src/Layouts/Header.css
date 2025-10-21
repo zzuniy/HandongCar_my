@@ -6,7 +6,7 @@
   color: white;
   padding: 14px 40px;
   font-family: "Pretendard", sans-serif;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .logo a {
@@ -28,12 +28,12 @@
 }
 
 .nav-item:hover {
-  color: #1abc9c;
+  color: #6a5af9;
 }
 
 .nav-item.active {
-  font-weight: bold;
-  border-bottom: 2px solid #1abc9c;
+  color: #6a5af9;
+  border-bottom: 1px solid #7c68ff;
 }
 body {
   margin: 0;
