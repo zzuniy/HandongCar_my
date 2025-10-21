@@ -1,5 +1,5 @@
 // src/pages/update.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPost, updatePost } from "../api";
 import styles from "../assets/styles/create&update.module.css";
@@ -13,19 +13,24 @@ export default function UpdatePage(){
   const [loadError,setLoadError] = useState("");
   const [pwOK,setPwOK] = useState(false);
   const [submitting,setSubmitting] = useState(false);
-  const [errors,setErrors] = useState({start_point:"",destination:"",note:""});
+  const [errors,setErrors] = useState({start_point:"",destination:"",note:"",host_nickname:""});
 
   const numericKeys = useMemo(()=>["total_people","current_people"],[]);
   const toInt = (v,fb=0)=>Number.isFinite(+v)?+v:fb;
   const under100 = (s)=> (s?.length??0) < 100;
+  const nickUnder10 = (s)=> (s?.length??0) < 10;
+
+  // ✅ StrictMode에서 useEffect가 2번 도는 문제로 prompt가 중복되는 것 방지
+  const askedRef = useRef(false);
 
   const validate=(draft)=>{
-    const e={start_point:"",destination:"",note:""};
+    const e={start_point:"",destination:"",note:"",host_nickname:""};
     if(!under100(draft.start_point)) e.start_point="출발지는 100자 미만이어야 합니다.";
     if(!under100(draft.destination)) e.destination="도착지는 100자 미만이어야 합니다.";
     if(!under100(draft.note)) e.note="비고는 100자 미만이어야 합니다.";
+    if(draft.host_nickname && !nickUnder10(draft.host_nickname)) e.host_nickname="호스트 닉네임은 10자 미만이어야 합니다.";
     setErrors(e);
-    return !e.start_point && !e.destination && !e.note;
+    return Object.values(e).every(v=>!v);
   };
 
   const askPassword = (pw)=>{
@@ -36,14 +41,19 @@ export default function UpdatePage(){
     return askPassword(pw); // 무제한 시도
   };
 
-  const fetchPost = async()=>{
+  const fetchPost = async(force=false)=>{
     if(!id) return;
+    // dev StrictMode에서 중복 호출 차단 (재시도 버튼은 force=true로 우회)
+    if(!force && askedRef.current) return;
+    askedRef.current = true;
+
     setLoading(true); setLoadError(""); setPwOK(false);
 
     try{
       const {data} = await getPost(id);
       if(!("password" in data)) throw new Error("PASSWORD_MISSING");
 
+      // 선확인
       const ok = askPassword(String(data.password));
       if(!ok){
         setLoadError("비밀번호 확인이 필요합니다. 아래 버튼으로 다시 시도하세요.");
@@ -61,7 +71,7 @@ export default function UpdatePage(){
         host_phone:data.host_phone ?? "", total_time:data.total_time ?? "",
         status:data.status ?? "모집 중",
         note:data.note ?? "",
-        host_nickname: data.host_nickname ?? "",          // ✅ 추가
+        host_nickname: data.host_nickname ?? "" // ✅ 신청자 닉네임은 받지 않음
       };
       setForm(safe); setPwOK(true); validate(safe);
     }catch(err){
@@ -74,13 +84,13 @@ export default function UpdatePage(){
     }
   };
 
-  useEffect(()=>{ fetchPost(); /* eslint-disable-next-line */ },[id]);
+  useEffect(()=>{ askedRef.current=false; fetchPost(); /* eslint-disable-next-line */ },[id]);
 
   const onChange=(e)=>{
     const {name,value}=e.target;
     setForm((f)=>{
       const draft={...f,[name]: numericKeys.includes(name)? (value===""?"":toInt(value,0)) : value};
-      if(["start_point","destination","note"].includes(name)) validate(draft);
+      if(["start_point","destination","note","host_nickname"].includes(name)) validate(draft);
       return draft;
     });
   };
@@ -122,7 +132,7 @@ export default function UpdatePage(){
         <div className={styles.card} style={{gap:12}}>
           <p style={{margin:0}}>{loadError}</p>
           <div className={styles.actions}>
-            <button className={`${styles.button} ${styles.btnGradient}`} onClick={fetchPost}>비밀번호 다시 시도</button>
+            <button className={`${styles.button} ${styles.btnGradient}`} onClick={()=>fetchPost(true)}>비밀번호 다시 시도</button>
             <button className={styles.button} onClick={()=>navigate(-1)}>뒤로가기</button>
           </div>
         </div>
@@ -151,12 +161,20 @@ export default function UpdatePage(){
             </div>
           </div>
 
-          {/* 닉네임(호스트) */}
-          <div className={styles.row2}>
-            <div className={styles.field}>
-              <label htmlFor="host_nickname" className={styles.label}>호스트 닉네임</label>
-              <input id="host_nickname" className={styles.input} name="host_nickname" value={form.host_nickname} onChange={onChange} maxLength={30} disabled={submitting}/>
-            </div>
+          {/* 호스트 닉네임 */}
+          <div className={styles.field}>
+            <label htmlFor="host_nickname" className={styles.label}>호스트 닉네임 (10자 미만)</label>
+            <input
+              id="host_nickname"
+              className={styles.input}
+              name="host_nickname"
+              value={form.host_nickname}
+              onChange={onChange}
+              maxLength={10}
+              disabled={submitting}
+            />
+            <span className={styles.counter}>{form.host_nickname.length}/10</span>
+            {errors.host_nickname && <p className={styles.error}>{errors.host_nickname}</p>}
           </div>
 
           {/* 출발지 */}
