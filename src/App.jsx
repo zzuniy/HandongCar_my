@@ -10,15 +10,15 @@ import "./assets/ui.css";
 export default function App() {
   return (
     <BrowserRouter>
-        <Routes>
-          <Route element={<MainLayout/>}> 
-            <Route path="/" element={<Home />} />
-            <Route path="/detail" element={<DetailPage />} />
-            <Route path="/create" element={<CreatePage />} />
-            <Route path="/update/:id" element={<UpdatePage />} />
-            
-          </Route>
-        </Routes>
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/detail" element={<DetailPage />} />
+          <Route path="/create" element={<CreatePage />} />
+          <Route path="/update/:id" element={<UpdatePage />} />
+
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

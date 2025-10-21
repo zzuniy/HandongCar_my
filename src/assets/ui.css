@@ -1,98 +1,90 @@
-:root {
-  /* 브랜드 컬러 */
-  --brand-grad: linear-gradient(135deg, #6a5af9, #b66bff);
-  --brand-1: #6a5af9;
-  --brand-2: #b66bff;
+:root{
+  /* Brand */
+  --brand-grad: linear-gradient(135deg,#6a5af9,#b66bff);
+  --brand-1:#6a5af9;
 
-  /* UI 토큰 */
-  --page-bg: #f6f7fb;         /* 배경은 밝게, 이전 페이지는 보이게 하진 않음(모달 라우트가 필요) */
-  --card-bg: rgba(255,255,255,.75);
-  --card-border: rgba(255,255,255,.6);
-  --text-1: #111;
-  --text-2: #666;
-  --border: #e9e9ef;
-  --radius: 16px;
-  --shadow: 0 12px 40px rgba(0,0,0,.08);
+  /* Base */
+  --page-bg:#f7f8fb;
+  --card-bg:rgba(255,255,255,.8);
+  --card-border:rgba(255,255,255,.65);
+  --text-1:#111; --text-2:#666;
+  --border:#e9e9ef;
+  --radius:18px;
+  --shadow:0 12px 36px rgba(22,24,35,.08);
 }
 
-html, body, #root { height: 100%; }
-body {
-  margin: 0;
-  background: var(--page-bg);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  color: var(--text-1);
+html,body,#root{height:100%}
+body{
+  margin:0;
+  background:var(--page-bg);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+  color:var(--text-1);
 }
 
-/* 레이아웃 여백 정리 */
-.container {
-  max-width: 720px;
-  margin: 56px auto;        /* 상하 여백 넉넉히 */
-  padding: 0 20px;          /* 좌우 여백 */
+/* layout */
+.page{
+  min-height:100dvh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:56px 16px;
+}
+.container{
+  width:100%;
+  max-width:720px;
+}
+.card{
+  background:var(--card-bg);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--card-border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:28px;
 }
 
-/* 글래스 카드 */
-.card {
-  background: var(--card-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 28px;
+/* heading */
+h1{margin:0 0 18px;font-size:24px}
+
+/* form */
+.form{display:grid;gap:16px}
+.row-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
 }
 
-/* 제목 */
-h1 { margin: 0 0 18px; font-size: 24px; }
-
-/* 폼 */
-.form { display: grid; gap: 14px; }
-
-/* 날짜-시간 2열: 붙어 보이지 않게 간격 넉넉히 */
-.row-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;                 /* <-- 간격 키움 */
+/* fields */
+.input,.select,.textarea{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:15px;
+  background:#fff;
+  outline:none;
+  box-shadow:0 1px 0 rgba(0,0,0,.02) inset;
 }
+.textarea{min-height:110px;resize:vertical}
+.input::placeholder,.textarea::placeholder{color:#b6b8c3}
 
-/* 인풋류 */
-.input, .select, .textarea, .button {
-  width: 100%;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  padding: 12px 14px;
-  font-size: 15px;
-  outline: none;
-  background: #fff;
-  box-shadow: 0 1px 0 rgba(0,0,0,.02) inset;
+.hint{font-size:12px;color:var(--text-2)}
+
+/* actions */
+.actions{margin-top:8px}
+.button{
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:14px;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform .03s ease,filter .15s ease;
 }
-
-.input::placeholder,
-.textarea::placeholder { color: #b4b6c0; }
-
-.textarea { min-height: 110px; resize: vertical; }
-
-.hint { font-size: 12px; color: var(--text-2); }
-
-/* 버튼: 보라 그라데이션 */
-.button {
-  color: #fff;
-  border: none;
-  padding: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform .03s ease;
+.button:active{transform:translateY(1px)}
+.btn-gradient{
+  background:var(--brand-grad);
+  box-shadow:0 8px 22px rgba(106,90,249,.35);
 }
-.button:active { transform: translateY(1px); }
-.btn-gradient {
-  background: var(--brand-grad);
-  box-shadow: 0 6px 18px rgba(106,90,249,.35);
-}
-
-/* 툴바(우측 정렬) */
-.toolbar { display:flex; justify-content:flex-end; margin-top: 8px; }
-
-/* 상태 뱃지(필요 시) */
-.badge {
-  display:inline-block; padding: 4px 10px; border:1px solid var(--border);
-  border-radius: 999px; font-size: 12px; color: var(--text-2);
-}
+.btn-gradient:hover{filter:brightness(1.02)}
