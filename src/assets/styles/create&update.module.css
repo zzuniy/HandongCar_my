@@ -74,3 +74,51 @@ h1{ margin:0 0 18px; font-size:24px; }
   box-shadow: 0 8px 22px rgba(106,90,249,.35);
 }
 .btnGradient:hover{ filter:brightness(1.02); }
+
+/* src/assets/styles/create&update.module.css */
+
+/* ...기존 스타일 위에/아래 적절히 추가 */
+
+/* 폼 공통 */
+.label {
+  display: inline-block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #444;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+}
+.help {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280; /* gray-500 */
+}
+.error {
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+/* 네이티브 외형 제거 (select/input 등) */
+.input, .select, .textarea {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* textarea 리사이즈 금지 */
+.textarea {
+  resize: none;
+}
+
+/* (선택) number input의 스핀버튼 제거 (크롬/사파리) */
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* (선택) 파폭 number 화살표 제거 */
+.input[type="number"] {
+  -moz-appearance: textfield;
+}
