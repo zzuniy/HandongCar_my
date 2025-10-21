@@ -127,3 +127,28 @@ margin-bottom: 0;
     padding: 10px;
     margin: 10px;
 }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 6px 8px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit; /* 아이콘 색상 유지 */
+}
+
+.icon-btn:hover {
+  opacity: 0.8;
+}
+
+.addcar.as-button {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.detail {
+  text-decoration: none; /* 밑줄 제거 */
+}
