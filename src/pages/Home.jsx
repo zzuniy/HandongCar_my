@@ -105,12 +105,14 @@ function Card({ data }) {
             <p>
               <FaPhoneAlt /> {item.host_phone}
             </p>
-          </div>
 
-          {/* 상세보기: /detail/:id 로 이동 */}
+            {/* 상세보기: /detail/:id 로 이동 */}
           <Link to={`/detail/${item.id}`} className="detail" role="button">
             상세보기
           </Link>
+          </div>
+
+          
         </div>
       ))}
     </div>

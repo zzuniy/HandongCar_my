@@ -1,5 +1,5 @@
 // src/pages/update.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPost, updatePost } from "../api";
 import styles from "../assets/styles/create&update.module.css";
@@ -20,8 +20,8 @@ export default function UpdatePage(){
   const under100 = (s)=> (s?.length??0) < 100;
   const nickUnder10 = (s)=> (s?.length??0) < 10;
 
-  // ✅ StrictMode에서 useEffect가 2번 도는 문제로 prompt가 중복되는 것 방지
-  const askedRef = useRef(false);
+  // ✅ StrictMode 재마운트에도 유지되도록 세션 스토리지 사용
+  const pwKey = id ? `pw_checked_post_${id}` : null;
 
   const validate=(draft)=>{
     const e={start_point:"",destination:"",note:"",host_nickname:""};
@@ -43,18 +43,22 @@ export default function UpdatePage(){
 
   const fetchPost = async(force=false)=>{
     if(!id) return;
-    // dev StrictMode에서 중복 호출 차단 (재시도 버튼은 force=true로 우회)
-    if(!force && askedRef.current) return;
-    askedRef.current = true;
-
     setLoading(true); setLoadError(""); setPwOK(false);
 
     try{
       const {data} = await getPost(id);
       if(!("password" in data)) throw new Error("PASSWORD_MISSING");
 
-      // 선확인
-      const ok = askPassword(String(data.password));
+      let ok = false;
+
+      // 세션 플래그가 있으면 프롬프트 생략
+      if(!force && pwKey && sessionStorage.getItem(pwKey) === "1"){
+        ok = true;
+      }else{
+        ok = askPassword(String(data.password));
+        if(ok && pwKey) sessionStorage.setItem(pwKey, "1"); // 성공시에만 플래그 저장
+      }
+
       if(!ok){
         setLoadError("비밀번호 확인이 필요합니다. 아래 버튼으로 다시 시도하세요.");
         setForm(null);
@@ -71,7 +75,7 @@ export default function UpdatePage(){
         host_phone:data.host_phone ?? "", total_time:data.total_time ?? "",
         status:data.status ?? "모집 중",
         note:data.note ?? "",
-        host_nickname: data.host_nickname ?? "" // ✅ 신청자 닉네임은 받지 않음
+        host_nickname: data.host_nickname ?? ""
       };
       setForm(safe); setPwOK(true); validate(safe);
     }catch(err){
@@ -84,7 +88,7 @@ export default function UpdatePage(){
     }
   };
 
-  useEffect(()=>{ askedRef.current=false; fetchPost(); /* eslint-disable-next-line */ },[id]);
+  useEffect(()=>{ fetchPost(); /* eslint-disable-next-line */ },[id]);
 
   const onChange=(e)=>{
     const {name,value}=e.target;
@@ -132,7 +136,16 @@ export default function UpdatePage(){
         <div className={styles.card} style={{gap:12}}>
           <p style={{margin:0}}>{loadError}</p>
           <div className={styles.actions}>
-            <button className={`${styles.button} ${styles.btnGradient}`} onClick={()=>fetchPost(true)}>비밀번호 다시 시도</button>
+            <button
+              className={`${styles.button} ${styles.btnGradient}`}
+              onClick={()=>{
+                // 강제 재확인: 플래그 제거 후 재시도
+                if(pwKey) sessionStorage.removeItem(pwKey);
+                fetchPost(true);
+              }}
+            >
+              비밀번호 다시 시도
+            </button>
             <button className={styles.button} onClick={()=>navigate(-1)}>뒤로가기</button>
           </div>
         </div>
@@ -161,7 +174,7 @@ export default function UpdatePage(){
             </div>
           </div>
 
-          {/* 호스트 닉네임 */}
+          {/* 호스트 닉네임 (10자 미만) */}
           <div className={styles.field}>
             <label htmlFor="host_nickname" className={styles.label}>호스트 닉네임 (10자 미만)</label>
             <input
