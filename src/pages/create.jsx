@@ -186,19 +186,8 @@ export default function CreatePage(){
             {errors.destination && <p className={styles.error}>{errors.destination}</p>}
           </div>
 
-          {/* 4) 정원 / 소요시간 */}
+          {/* 4) 정원 */}
           <div className={styles.row2}>
-            <div className={styles.field}>
-              <label htmlFor="total_time" className={styles.label}>소요시간</label>
-              <input
-                id="total_time"
-                className={styles.input}
-                name="total_time"
-                value={form.total_time}
-                onChange={onChange}
-                disabled={submitting}
-              />
-            </div>
             <div className={styles.field}>
               <label htmlFor="total_people" className={styles.label}>정원</label>
               <select
