@@ -20,7 +20,7 @@ export default function UpdatePage(){
   const under100 = (s)=> (s?.length??0) < 100;
   const nickUnder10 = (s)=> (s?.length??0) < 10;
 
-  // ✅ StrictMode에서 useEffect가 2번 도는 문제로 prompt가 중복되는 것 방지
+  // StrictMode 중복 prompt 방지
   const askedRef = useRef(false);
 
   const validate=(draft)=>{
@@ -38,12 +38,11 @@ export default function UpdatePage(){
     if(input===null) return false;
     if(String(input)===String(pw)) return true;
     alert("비밀번호가 올바르지 않습니다. 다시 시도하세요.");
-    return askPassword(pw); // 무제한 시도
+    return askPassword(pw);
   };
 
   const fetchPost = async(force=false)=>{
     if(!id) return;
-    // dev StrictMode에서 중복 호출 차단 (재시도 버튼은 force=true로 우회)
     if(!force && askedRef.current) return;
     askedRef.current = true;
 
@@ -53,7 +52,6 @@ export default function UpdatePage(){
       const {data} = await getPost(id);
       if(!("password" in data)) throw new Error("PASSWORD_MISSING");
 
-      // 선확인
       const ok = askPassword(String(data.password));
       if(!ok){
         setLoadError("비밀번호 확인이 필요합니다. 아래 버튼으로 다시 시도하세요.");
@@ -64,14 +62,21 @@ export default function UpdatePage(){
 
       const safe={
         id:data.id ?? id,
+        // 1) 닉네임/전화번호
+        host_nickname: data.host_nickname ?? "",
+        host_phone: data.host_phone ?? "",
+        // 2) 날짜/시간
         date:data.date ?? "", time:data.time ?? "",
+        // 3) 출발/도착
         start_point:data.start_point ?? "", destination:data.destination ?? "",
-        total_people:toInt(data.total_people,1),
+        // 4) 정원/소요시간
+        total_people:toInt(data.total_people,2),
+        total_time:data.total_time ?? "",
+        // 서버 보존용(편집 UI엔 없음)
         current_people:toInt(data.current_people,0),
-        host_phone:data.host_phone ?? "", total_time:data.total_time ?? "",
         status:data.status ?? "모집 중",
-        note:data.note ?? "",
-        host_nickname: data.host_nickname ?? "" // ✅ 신청자 닉네임은 받지 않음
+        // 기타
+        note:data.note ?? ""
       };
       setForm(safe); setPwOK(true); validate(safe);
     }catch(err){
@@ -99,16 +104,14 @@ export default function UpdatePage(){
     e.preventDefault();
     if(!pwOK) { alert("먼저 비밀번호를 확인하세요."); return; }
     if(!form) return;
-
     if(!validate(form)){ alert("입력값을 확인하세요."); return; }
 
-    const total=toInt(form.total_people,1);
+    const total=toInt(form.total_people,2);
     const curr =toInt(form.current_people,0);
-    if(curr>total){ alert("현재 인원이 정원을 초과했습니다."); return; }
+    if(curr>total){ alert("현재 인원보다 작은 정원으로는 저장할 수 없습니다."); return; }
 
-    const next={ ...form, total_people:total, current_people:curr,
-      status: curr>=total? "마감": (form.status || "모집 중")
-    };
+    // 상태/현재인원은 상세에서 자동 노출 → 값은 보존만
+    const next={ ...form, total_people:total, current_people:curr, status:form.status };
 
     try{
       setSubmitting(true);
@@ -149,7 +152,36 @@ export default function UpdatePage(){
         <h1>같이카 수정</h1>
 
         <form className={styles.form} onSubmit={onSubmit} noValidate>
-          {/* 날짜/시간 */}
+          {/* 1) 닉네임 / 전화번호 */}
+          <div className={styles.row2}>
+            <div className={styles.field}>
+              <label htmlFor="host_nickname" className={styles.label}>호스트 닉네임 (10자 미만)</label>
+              <input
+                id="host_nickname"
+                className={styles.input}
+                name="host_nickname"
+                value={form.host_nickname}
+                onChange={onChange}
+                maxLength={10}
+                disabled={submitting}
+              />
+              <span className={styles.counter}>{form.host_nickname.length}/10</span>
+              {errors.host_nickname && <p className={styles.error}>{errors.host_nickname}</p>}
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="host_phone" className={styles.label}>전화번호</label>
+              <input
+                id="host_phone"
+                className={styles.input}
+                name="host_phone"
+                value={form.host_phone}
+                onChange={onChange}
+                disabled={submitting}
+              />
+            </div>
+          </div>
+
+          {/* 2) 날짜 / 시간 */}
           <div className={styles.row2}>
             <div className={styles.field}>
               <label htmlFor="date" className={styles.label}>날짜</label>
@@ -161,23 +193,7 @@ export default function UpdatePage(){
             </div>
           </div>
 
-          {/* 호스트 닉네임 */}
-          <div className={styles.field}>
-            <label htmlFor="host_nickname" className={styles.label}>호스트 닉네임 (10자 미만)</label>
-            <input
-              id="host_nickname"
-              className={styles.input}
-              name="host_nickname"
-              value={form.host_nickname}
-              onChange={onChange}
-              maxLength={10}
-              disabled={submitting}
-            />
-            <span className={styles.counter}>{form.host_nickname.length}/10</span>
-            {errors.host_nickname && <p className={styles.error}>{errors.host_nickname}</p>}
-          </div>
-
-          {/* 출발지 */}
+          {/* 3) 출발지 / 도착지 */}
           <div className={styles.field}>
             <label htmlFor="start_point" className={styles.label}>출발지 (100자 미만)</label>
             <input id="start_point" className={styles.input} name="start_point" value={form.start_point} onChange={onChange} maxLength={100} disabled={submitting}/>
@@ -185,7 +201,6 @@ export default function UpdatePage(){
             {errors.start_point && <p className={styles.error}>{errors.start_point}</p>}
           </div>
 
-          {/* 도착지 */}
           <div className={styles.field}>
             <label htmlFor="destination" className={styles.label}>도착지 (100자 미만)</label>
             <input id="destination" className={styles.input} name="destination" value={form.destination} onChange={onChange} maxLength={100} disabled={submitting}/>
@@ -193,39 +208,13 @@ export default function UpdatePage(){
             {errors.destination && <p className={styles.error}>{errors.destination}</p>}
           </div>
 
-          {/* 정원/현재 */}
-          <div className={styles.row2}>
-            <div className={styles.field}>
-              <label htmlFor="total_people" className={styles.label}>정원</label>
-              <select id="total_people" className={styles.select} name="total_people" value={form.total_people} onChange={onChange} disabled={submitting}>
-                <option value={1}>1명</option><option value={2}>2명</option>
-                <option value={3}>3명</option><option value={4}>4명</option>
-              </select>
-            </div>
-            <div className={styles.field}>
-              <label htmlFor="current_people" className={styles.label}>현재 인원</label>
-              <input id="current_people" className={styles.input} type="number" min="0" name="current_people" value={form.current_people} onChange={onChange} disabled={submitting}/>
-            </div>
-          </div>
-
-          {/* 연락처/소요시간 */}
-          <div className={styles.row2}>
-            <div className={styles.field}>
-              <label htmlFor="host_phone" className={styles.label}>호스트 연락처</label>
-              <input id="host_phone" className={styles.input} name="host_phone" value={form.host_phone} onChange={onChange} disabled={submitting}/>
-            </div>
-            <div className={styles.field}>
-              <label htmlFor="total_time" className={styles.label}>소요시간</label>
-              <input id="total_time" className={styles.input} name="total_time" value={form.total_time} onChange={onChange} disabled={submitting}/>
-            </div>
-          </div>
-
-          {/* 상태 */}
+          {/* 4) 정원 */}
           <div className={styles.field}>
-            <label htmlFor="status" className={styles.label}>상태</label>
-            <select id="status" className={styles.select} name="status" value={form.status} onChange={onChange} disabled={submitting}>
-              <option value="모집 중">모집 중</option>
-              <option value="마감">마감</option>
+            <label htmlFor="total_people" className={styles.label}>정원</label>
+            <select id="total_people" className={styles.select} name="total_people" value={form.total_people} onChange={onChange} disabled={submitting}>
+              <option value={2}>2명</option>
+              <option value={3}>3명</option>
+              <option value={4}>4명</option>
             </select>
           </div>
 
@@ -237,6 +226,7 @@ export default function UpdatePage(){
             {errors.note && <p className={styles.error}>{errors.note}</p>}
           </div>
 
+          {/* 비밀번호 입력창 없음 (prompt로만 확인) */}
           <div className={styles.actions}>
             <button className={`${styles.button} ${styles.btnGradient}`} type="submit" disabled={submitting}>
               {submitting ? "수정 중…" : "수정 하기"}
