@@ -18,51 +18,9 @@ function Home(){
   }, []);
   return(
     <>
-        <div className="recruit-text">
-          <h1>카풀 모집</h1>
-          <p className = "with-text">함께 이용할 동승자를 찾아보세요</p>
-        </div>
-      <div className="addallign">
-        <input type="text" className="search"placeholder="검색"></input>
-        <button className="addcar">+ 게시글 추가</button>
-      </div>
-   
-      <br/>
-  
-     <Card data={data}/>
+   <h1>한동대학교 학생들을 위한 </h1>
+   <h1>스마트 카풀 매칭</h1>
     </>
-  );
-};
-
-function Card({data}){
-    if (!Array.isArray(data)) return null; 
-    
-  return(
-    <div className="cardallign">
-      {data.map((item, index) => (
-        <div key={index} className="card">
-          <div className="card-header">
-            <span className={`status ${item.status === "모집 중" ? "open" : "closed"}`}>
-              {item.status}
-            </span>
-            <div className="card-actions">
-              <button><FaEdit /></button>
-              <button><FaTrash /></button>
-            </div>
-          </div>
-
-          <div className="card-info">
-            <p><FaUser /> {item.host_nickname}</p>
-            <p><FaMapMarkerAlt /> {item.start_point} → {item.destination}</p>
-            <p><FaRegClock /> {item.date} {item.time}</p>
-            <p><FaUserFriends /> {item.current_people}/{item.total_people}</p>
-            
-          </div>
-
-          <button className="detail">상세보기</button>
-        </div>
-      ))}
-    </div>
   );
 };
 
