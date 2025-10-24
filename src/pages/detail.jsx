@@ -249,12 +249,14 @@ function DetailPage() {
 
   async function getParticipantsInfo() {
     try{
-      const response = await axios.get(`https://68f63d016b852b1d6f169327.mockapi.io/participants`);
-      setParticipants(response.data);
-      console.log("참가자api 연결 성공",response.data)
-    }catch(err){
-      console.log(err);
-    }
+      const response = await axios.get(`https://68f63d016b852b1d6f169327.mockapi.io/participants`,
+        { params: { post_id: id } }
+    );
+    setParticipants(response.data ?? []);
+    console.log("참가자api 연결 성공",response.data)
+  }catch(err){
+    console.log(err);
+  }
   }
 
   useEffect(() => {
