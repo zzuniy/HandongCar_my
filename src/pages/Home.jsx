@@ -17,9 +17,13 @@ function Home(){
       .catch((err) => console.error("API 불러오기 오류:", err));
   }, []);
   return(
-    <>
-   <h1>한동대학교 학생들을 위한 </h1>
-   <h1>스마트 카풀 매칭</h1>
+    <><div className="layout">
+    <p className="survice-p">한동대학교 전용 서비스</p>
+   <h1 className = "forHGU-h1">한동대학교 학생들을 위한 </h1>
+   <h1 className ="smart-h1">스마트 카풀 매칭</h1>
+   <p className="explain-p">기존 오픈채팅방의 불편함을 해소하고, 직관적인 인터페이스로 원하는 시간대·노선의 카풀을 쉽고 빠르게 찾아보세요.</p>
+   <button className="apply-btn">바로 체험하기</button>
+   </div>
     </>
   );
 };
