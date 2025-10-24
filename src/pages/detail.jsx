@@ -113,8 +113,8 @@ const UserSectionWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 2%;
-  margin-bottom: 2%;
+  margin-top: 5%;
+  margin-bottom: 1%;
 `;
 
 const UserLeft = styled.div`
