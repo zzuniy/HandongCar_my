@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 import Join from "../components/modals/joinModal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { byPrefixAndName } from "@fortawesome/fontawesome-svg-core/import.macro";
+
 
 const PageWrap = styled.div`
   display: flex;
@@ -98,7 +101,7 @@ const SubTitle = styled.h2`
 function Infomation() {
   return (
     <InfoItem>
-      <InfoIcon>아이콘</InfoIcon>
+      <InfoIcon><FontAwesomeIcon icon={byPrefixAndName.fas['location-dot']} style={{color: "#469c4d",}} /></InfoIcon>
       <InfoText>
         <InfoTitle>출발지</InfoTitle>
         <InfoContents>서울역</InfoContents>
