@@ -12,7 +12,7 @@ export default function App() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/detail" element={<DetailPage />} />
+          <Route path="/post/:id" element={<DetailPage />} />
           <Route path="/create" element={<CreatePage />} />
           <Route path="/update/:id" element={<UpdatePage />} />
 

@@ -3,7 +3,9 @@ import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 import Join from "../components/modals/joinModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { byPrefixAndName } from "@fortawesome/fontawesome-svg-core/import.macro";
+import { faLocationDot, faFlagCheckered, faCalendar, faUsers } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 
 const PageWrap = styled.div`
@@ -75,7 +77,6 @@ display: flex;
   width: 5vw;
   height: 10vh;
   border-radius: 10px;
-  background-color: #E1FBE8;
   flex-shrink: 0;
 `;
 const InfoText = styled.div`
@@ -96,19 +97,6 @@ const InfoContents = styled.p`
 const SubTitle = styled.h2`
   display: flex;
 `;
-
-
-function Infomation() {
-  return (
-    <InfoItem>
-      <InfoIcon><FontAwesomeIcon icon={byPrefixAndName.fas['location-dot']} style={{color: "#469c4d",}} /></InfoIcon>
-      <InfoText>
-        <InfoTitle>출발지</InfoTitle>
-        <InfoContents>서울역</InfoContents>
-      </InfoText>
-    </InfoItem>
-  )
-}
 
 // ========== 사용자 정보 컨테이너 ==========
 
@@ -140,6 +128,17 @@ const UserName = styled.span`
   font-size: 14px;
   color: #1a1a1a;
 `;
+const NoteText = styled.p`
+  font-size: 13px;
+  color: #555;
+  margin-top: 5%;           
+  margin-bottom: 0;
+  line-height: 1.4;
+  word-break: keep-all;      
+  white-space: normal;       
+  max-width: 280px;          
+  overflow-wrap: break-word; 
+`;
 
 const Contact = styled.span`
   font-weight: 700;
@@ -149,16 +148,17 @@ const Contact = styled.span`
 `;
 
 
-function UserSection() {
+function UserSection({participants}) {
   return (
     <UserSectionWrapper>
       <UserLeft>
         <UserIcon src="https://via.placeholder.com/40" alt="프로필" />
         <InfoContents>
-          <UserName>김민수</UserName>
+          <UserName>{participants.participant_nickname}</UserName>
+          <NoteText>{participants.participant_note}</NoteText>
         </InfoContents>
       </UserLeft>
-      <Contact>010-1234-5678</Contact>
+      <Contact>{participants.participant_phone}</Contact>
     </UserSectionWrapper>
   );
 }
@@ -205,11 +205,12 @@ const ApplyBtn = styled.button`
   cursor: pointer;
 `;
 
-function ApplyContainer() {
-  const percent = ( 2 / 4 )*100;
+function ApplyContainer({ data }) {
+  const percent =  (data.current_people / data.total_people) * 100;
+
 
   return (
-    
+
     <>
       <PriceCard>
         <SubTitle>15000원</SubTitle>
@@ -217,10 +218,10 @@ function ApplyContainer() {
 
         <SeatsRow>
           <span>잔여좌석</span>
-          <span>2석</span>
+          <span>{data.current_people}석</span>
         </SeatsRow>
         <ProgressTrack>
-          <ProgressBar percent={percent}/>
+          <ProgressBar percent={percent} />
         </ProgressTrack>
 
         <ApplyBtn>신청하기</ApplyBtn>
@@ -229,23 +230,88 @@ function ApplyContainer() {
   )
 }
 
+
+
 function DetailPage() {
+  const [data, setData] = useState({});
+  const [participants, setParticipants] = useState([]);
+  const { id } = useParams();
+
+  async function getPostInfo() {
+    try {
+      const res = await axios.get(`https://68f63d016b852b1d6f169327.mockapi.io/posts/${id}`);
+      setData(res.data);
+      console.log("게시글 api 연결 성공", res.data)
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function getParticipantsInfo() {
+    try{
+      const response = await axios.get(`https://68f63d016b852b1d6f169327.mockapi.io/participants`);
+      setParticipants(response.data);
+      console.log("참가자api 연결 성공",response.data)
+    }catch(err){
+      console.log(err);
+    }
+  }
+
+  useEffect(() => {
+    getPostInfo();
+    getParticipantsInfo();
+  }, [id]);
+
   return (
     <>
       <PageWrap>
         <LeftPage>
           <Container>
-            <CurrentSituation>모집중</CurrentSituation>
+            <CurrentSituation>{data.status}</CurrentSituation>
             <SubTitle>모집 정보</SubTitle>
             <InfoGrid>
-              <Infomation />
-              <Infomation />
-              <Infomation />
-              <Infomation />
+              <InfoItem>
+                <InfoIcon style={{backgroundColor:"#E1FBE8"}}><FontAwesomeIcon icon={faLocationDot} style={{ color: "#469c4d" }} /></InfoIcon>
+                <InfoText>
+                  <InfoTitle>출발지</InfoTitle>
+                  <InfoContents>{data.start_point}</InfoContents>
+                </InfoText>
+              </InfoItem>
+              <InfoItem>
+                <InfoIcon style={{background:"#FAE2E2"}}><FontAwesomeIcon icon={faFlagCheckered} style={{color: "#cf4a44",}} /></InfoIcon>
+                <InfoText>
+                  <InfoTitle>도착지</InfoTitle>
+                  <InfoContents>{data.destination}</InfoContents>
+                </InfoText>
+              </InfoItem>
+              <InfoItem>
+                <InfoIcon style={{background:"#DEE9FC"}}><FontAwesomeIcon icon={faCalendar} style={{ color: "#355fe2" }} /></InfoIcon>
+                <InfoText>
+                  <InfoTitle>출발 일시</InfoTitle>
+                  <InfoContents>{data.date}</InfoContents>
+                  <InfoContents>{data.time}</InfoContents>
+                </InfoText>
+              </InfoItem>
+              <InfoItem>
+                <InfoIcon style={{background:"#F1E8FD"}}><FontAwesomeIcon icon={faUsers} style={{ color: "#8435e0" }} /></InfoIcon>
+                <InfoText>
+                  <InfoTitle>모집인원</InfoTitle>
+                  <InfoContents>{data.total_people}명 (잔여 {data.current_people}명)</InfoContents>
+                </InfoText>
+              </InfoItem>
             </InfoGrid>
 
             <SubTitle>호스트 정보</SubTitle>
-            <UserSection />
+            <UserSectionWrapper>
+              <UserLeft>
+                <UserIcon src="https://via.placeholder.com/40" alt="프로필" />
+                <InfoContents>
+                  <UserName>{data.host_nickname}</UserName>
+                  <NoteText>{data.note}</NoteText>
+                </InfoContents>
+              </UserLeft>
+              <Contact>{data.host_phone}</Contact>
+            </UserSectionWrapper>
           </Container>
 
           <Container>
@@ -257,7 +323,7 @@ function DetailPage() {
 
         </LeftPage>
         <RightPage>
-          <ApplyContainer/>
+          <ApplyContainer />
         </RightPage>
       </PageWrap>
     </>
