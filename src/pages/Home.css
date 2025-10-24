@@ -1,3 +1,18 @@
+
+.survice-p{
+    background-color: #cec8ff;
+    font-size: 14px;
+    border-radius: 30px;
+    width: 200px;
+    padding: 10px;
+
+}
+.layout{
+      background: linear-gradient(135deg, #6a5af9, #b66bff);
+      width: 100vw; 
+  height: 100vh;
+
+
 .card {
   width: 350px;
   border: 1px solid #e6e6e6;
@@ -71,7 +86,7 @@
 }
 
 .detail {
-  display: inline-block; /* 버튼처럼 */
+  display: inline-block; 
   cursor: pointer;
   color: white;
   width: 100%;
@@ -153,7 +168,6 @@
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  /* 아이콘 색상 유지 */
 }
 
 .icon-btn:hover {
@@ -167,5 +181,6 @@
 
 .detail {
   text-decoration: none;
-  /* 밑줄 제거 */
+
+
 }
