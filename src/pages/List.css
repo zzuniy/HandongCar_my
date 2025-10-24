@@ -1,0 +1,129 @@
+
+.card{
+    width: 350px;
+    border: 1px solid #e6e6e6;
+    border-radius: 15px;
+    margin: 1ㄴ0px;
+    padding: 20px;
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+.card:hover{
+    transform: translateY(-5px);
+  box-shadow: 0 8px 15px #e9e6ff; 
+}
+.cardallign {
+  margin-left: 95px;
+  display: flex; 
+  gap: 16px;    
+  flex-wrap: wrap;    
+  justify-content: flex-start; 
+}
+.status{
+    font-size: 14px;
+    border-radius: 30px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 4px;
+    padding-bottom: 3px;
+    margin: 5px;
+}
+
+.status.open{
+    background-color: #b6f3cb;
+    color: #157436;
+}
+.status.closed{
+    background-color: #f3b6b6;
+    color: #741515;
+}
+.card-actions button {
+  background: none;
+  color: #a7a7a7;
+  border: none;
+  cursor: pointer;
+  font-size: 18px; 
+  margin-right: 8px;
+  transition: 0.2s;
+}
+
+.card-actions button:hover {
+  opacity: 0.7;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;          
+  margin-bottom: 2px;
+}
+
+.card-actions {
+  display: flex;
+}
+
+.card-info {
+    background: none;
+    color: #5b5b5b;
+}
+.detail {
+    cursor: pointer;
+    color: white;
+    width: 100%;
+    background: linear-gradient(135deg, #6a5af9, #b66bff);
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+}
+.detail:hover{
+    opacity: 0.7;
+}
+
+.addcar{
+    
+     background: linear-gradient(135deg, #6a5af9, #b66bff);
+    padding-right: 30px;
+    padding-left: 30px;
+    padding-top: 14px;
+    padding-bottom: 10px;
+    margin: 20px;
+     color: white;
+     border: none;
+     border-radius: 10px;
+    cursor: pointer;
+}
+.addcar:hover{
+     opacity: 0.7;
+}
+.addallign{
+  margin-left: 450px;
+  display: flex;   
+  justify-content: space-between; 
+  align-items: center;          
+}
+.recruit-text{
+
+margin-left: 20px;
+margin-top: 0;
+margin-left:30px;
+margin-bottom: 0; 
+}
+.recruit-text h1 {
+
+  margin-bottom: 4px; 
+}
+
+.recruit-text p {
+  margin-top: 0;
+  margin-bottom: 0; 
+}
+
+.with-text{
+    color: #5b5b5b;
+}
+.search{
+
+    width: 400px;
+    border: 1px solid #bababa;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px;
+}

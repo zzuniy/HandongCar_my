@@ -1,0 +1,169 @@
+/* src/assets/styles/create&update.module.css */
+
+/* 전체 요소 크기 계산을 border-box 기준으로 통일 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ===== 페이지 공통 구조 ===== */
+.page{
+  min-height:100dvh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:56px 20px;
+  background: radial-gradient(1200px 600px at 50% -10%, #dde0ec, #d6d9e8 55%, #ced2e3 100%);
+}
+
+/* 이하 그대로 */
+.container{ width:100%; max-width:720px; }
+.card{
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(230,232,240,.7);
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(22,24,35,.08);
+  padding: 28px;
+}
+/* ... (이하 기존 내용 그대로 유지) */
+h1{ margin:0 0 18px; font-size:24px; }
+
+.form{ display:grid; gap:16px; }
+.row2{ display:flex; gap:20px; }
+.row2 > * { flex:1; }
+
+.input,.select,.textarea{
+  width:100%;
+  border:1px solid #e0e3ef;
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:15px;
+  background:#fff;
+  outline:none;
+  box-shadow:0 1px 0 rgba(0,0,0,.03) inset;
+}
+.textarea{ min-height:110px; resize:vertical; }
+.input::placeholder,.textarea::placeholder{ color:#b6b8c3; }
+
+.input:focus,.select:focus,.textarea:focus{
+  border-color:#c8ccf5;
+  box-shadow:0 0 0 3px rgba(106,90,249,.12);
+  outline:0;
+}
+
+.hint{ font-size:12px; color:#666; }
+.hintError{ color:#c03737; }
+
+.actions{ margin-top:12px; }
+.button{
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:14px;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  transition: transform .03s ease, filter .15s ease;
+}
+.button:active{ transform: translateY(1px); }
+.btnGradient{
+  background: linear-gradient(135deg,#6a5af9,#b66bff);
+  box-shadow: 0 8px 22px rgba(106,90,249,.35);
+}
+.btnGradient:hover{ filter:brightness(1.02); }
+
+/* src/assets/styles/create&update.module.css */
+
+/* ...기존 스타일 위에/아래 적절히 추가 */
+
+/* 폼 공통 */
+.label {
+  display: inline-block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #444;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+}
+.help {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280; /* gray-500 */
+}
+.error {
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+/* 네이티브 외형 제거 (select/input 등) */
+.input, .select, .textarea {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* textarea 리사이즈 금지 */
+.textarea {
+  resize: none;
+}
+
+/* (선택) number input의 스핀버튼 제거 (크롬/사파리) */
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* (선택) 파폭 number 화살표 제거 */
+.input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.counter {
+  position: absolute;
+  bottom: 6px;
+  right: 10px;
+  font-size: 12px;
+  color: #9ca3af; /* 회색 톤 */
+  background: rgba(255,255,255,0.7);
+  padding: 0 4px;
+  border-radius: 4px;
+  pointer-events: none; /* 클릭 안 가게 */
+}
+
+/* 라벨/필드/헬프 */
+.label{display:inline-block;font-size:14px;margin-bottom:6px;color:#444}
+.field{position:relative;display:flex;flex-direction:column;margin-bottom:16px}
+.help{margin-top:4px;font-size:12px;color:#6b7280}
+.error{color:#d32f2f;font-weight:500}
+
+/* 네이티브 외형 최소화 */
+.input,.select,.textarea{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  padding-right:48px; /* 우하단 카운터 겹침 방지 */
+}
+
+/* textarea 크기 조절 금지 */
+.textarea{resize:none}
+
+/* number 스핀 제거(선택) */
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+.input[type="number"]{ -moz-appearance:textfield }
+
+/* 우하단 카운터 */
+.counter{
+  position:absolute;bottom:6px;right:10px;font-size:12px;color:#9ca3af;
+  background:rgba(255,255,255,.7);padding:0 4px;border-radius:4px;pointer-events:none;
+}
