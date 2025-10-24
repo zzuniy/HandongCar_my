@@ -3,29 +3,29 @@ import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 import Join from "../components/modals/joinModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLocationDot, faFlagCheckered, faCalendar, faUsers } from "@fortawesome/free-solid-svg-icons";
+import { faLocationDot, faFlagCheckered, faCalendar, faUsers, faUser } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
 
 const PageWrap = styled.div`
   display: flex;
-  gap: 10%;
-  padding: 4%;
+  gap: 32px;               
+  padding: 24px;           
   box-sizing: border-box;
   width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
+  max-width: 1100px;       
+  margin: 0 auto; 
 `;
 
 const LeftPage = styled.div`
-  align-items: center;
   width: 100%;
+  flex: 1;
+  min-width: 0;
 `;
 const RightPage = styled.div`
-  align-items: center;
-  flex-direction: row-reverse;
-  width: 100%;
+  width: 360px;
+  flex: 0 0 360px;
 `;
 
 // ================ 연속적으로 쓰일 상자 =================
@@ -34,8 +34,9 @@ const Container = styled.section`
   background: #fff;
   border: 1px solid #e8e8ec;
   border-radius: 14px;
-  padding: 10%;
+  padding: 5% 10% 8% 10%;
   box-shadow: 0 2px 10px rgba(18, 18, 23, 0.04);
+  margin-bottom: 3vh;
 `;
 
 // ================ 모집 현황 =================
@@ -74,10 +75,14 @@ const InfoIcon = styled.div`
 display: flex;
   justify-content: center;
   align-items: center;
-  width: 5vw;
-  height: 10vh;
+  width: 3vw;
+  height: 6vh;
   border-radius: 10px;
   flex-shrink: 0;
+
+  svg{
+    font-size: 25px;
+  }
 `;
 const InfoText = styled.div`
   display: flex;
@@ -104,9 +109,9 @@ const UserIcon = styled.img`
   display: flex;
   border-radius: 50%;
   aspect-ratio: 1 / 1;
-  background-color: #e6f0ff;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
-
 `;
 
 const UserSectionWrapper = styled.div`
@@ -149,10 +154,14 @@ const Contact = styled.span`
 
 
 function UserSection({ participant }) {
+  const randomNumber = Math.floor(Math.random() * 99);
+  const randomGender = Math.random() > 0.5 ? "men" : "women";
+  const randomImage = `https://randomuser.me/api/portraits/${randomGender}/${randomNumber}.jpg`;
   return (
+
     <UserSectionWrapper>
       <UserLeft>
-        <UserIcon src="https://via.placeholder.com/40" alt="프로필" />
+        <UserIcon src={randomImage} alt="프로필" />
         <InfoContents>
           <UserName>{participant?.participant_nickname}</UserName>
           <NoteText>{participant?.participant_note}</NoteText>
@@ -233,9 +242,14 @@ function ApplyContainer({ data }) {
 
 
 function DetailPage() {
+
   const [data, setData] = useState({});
   const [participants, setParticipants] = useState([]);
   const { id } = useParams();
+
+  const randomNumber = Math.floor(Math.random() * 99);
+  const randomGender = Math.random() > 0.5 ? "men" : "women";
+  const randomImage = `https://randomuser.me/api/portraits/${randomGender}/${randomNumber}.jpg`;
 
   async function getPostInfo() {
     try {
@@ -302,11 +316,11 @@ function DetailPage() {
                 </InfoText>
               </InfoItem>
             </InfoGrid>
-
+            <hr style={{ border: "1px solid #e5e7eb", margin: "24px 0" }} />
             <SubTitle>호스트 정보</SubTitle>
             <UserSectionWrapper>
               <UserLeft>
-                <UserIcon src="https://via.placeholder.com/40" alt="프로필" />
+                <UserIcon src={randomImage} alt="프로필" />
                 <InfoContents>
                   <UserName>{data.host_nickname}</UserName>
                   <NoteText>{data.note}</NoteText>
