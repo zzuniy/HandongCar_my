@@ -1,10 +1,14 @@
 .survice-p{
-    background-color: #6a5af9;
+    background-color: #cec8ff;
     font-size: 14px;
     border-radius: 30px;
     width: 200px;
+    padding: 10px;
+
 }
 .layout{
       background: linear-gradient(135deg, #6a5af9, #b66bff);
-      height: 600px;
+      width: 100vw; 
+  height: 100vh;
+
 }
