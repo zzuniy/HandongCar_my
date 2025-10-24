@@ -148,17 +148,17 @@ const Contact = styled.span`
 `;
 
 
-function UserSection({participants}) {
+function UserSection({ participant }) {
   return (
     <UserSectionWrapper>
       <UserLeft>
         <UserIcon src="https://via.placeholder.com/40" alt="프로필" />
         <InfoContents>
-          <UserName>{participants.participant_nickname}</UserName>
-          <NoteText>{participants.participant_note}</NoteText>
+          <UserName>{participant?.participant_nickname}</UserName>
+          <NoteText>{participant?.participant_note}</NoteText>
         </InfoContents>
       </UserLeft>
-      <Contact>{participants.participant_phone}</Contact>
+      <Contact>{participant?.participant_phone}</Contact>
     </UserSectionWrapper>
   );
 }
@@ -206,11 +206,11 @@ const ApplyBtn = styled.button`
 `;
 
 function ApplyContainer({ data }) {
-  const percent =  (data.current_people / data.total_people) * 100;
-
+  const total = Number(data?.total_people ?? 0);
+  const current = Number(data?.current_people ?? 0);
+  const percent = total > 0 ? (current / total) * 100 : 0;
 
   return (
-
     <>
       <PriceCard>
         <SubTitle>15000원</SubTitle>
@@ -248,15 +248,15 @@ function DetailPage() {
   }
 
   async function getParticipantsInfo() {
-    try{
+    try {
       const response = await axios.get(`https://68f63d016b852b1d6f169327.mockapi.io/participants`,
         { params: { post_id: id } }
-    );
-    setParticipants(response.data ?? []);
-    console.log("참가자api 연결 성공",response.data)
-  }catch(err){
-    console.log(err);
-  }
+      );
+      setParticipants(response.data ?? []);
+      console.log("참가자api 연결 성공", response.data)
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   useEffect(() => {
@@ -273,21 +273,21 @@ function DetailPage() {
             <SubTitle>모집 정보</SubTitle>
             <InfoGrid>
               <InfoItem>
-                <InfoIcon style={{backgroundColor:"#E1FBE8"}}><FontAwesomeIcon icon={faLocationDot} style={{ color: "#469c4d" }} /></InfoIcon>
+                <InfoIcon style={{ backgroundColor: "#E1FBE8" }}><FontAwesomeIcon icon={faLocationDot} style={{ color: "#469c4d" }} /></InfoIcon>
                 <InfoText>
                   <InfoTitle>출발지</InfoTitle>
                   <InfoContents>{data.start_point}</InfoContents>
                 </InfoText>
               </InfoItem>
               <InfoItem>
-                <InfoIcon style={{background:"#FAE2E2"}}><FontAwesomeIcon icon={faFlagCheckered} style={{color: "#cf4a44",}} /></InfoIcon>
+                <InfoIcon style={{ background: "#FAE2E2" }}><FontAwesomeIcon icon={faFlagCheckered} style={{ color: "#cf4a44", }} /></InfoIcon>
                 <InfoText>
                   <InfoTitle>도착지</InfoTitle>
                   <InfoContents>{data.destination}</InfoContents>
                 </InfoText>
               </InfoItem>
               <InfoItem>
-                <InfoIcon style={{background:"#DEE9FC"}}><FontAwesomeIcon icon={faCalendar} style={{ color: "#355fe2" }} /></InfoIcon>
+                <InfoIcon style={{ background: "#DEE9FC" }}><FontAwesomeIcon icon={faCalendar} style={{ color: "#355fe2" }} /></InfoIcon>
                 <InfoText>
                   <InfoTitle>출발 일시</InfoTitle>
                   <InfoContents>{data.date}</InfoContents>
@@ -295,7 +295,7 @@ function DetailPage() {
                 </InfoText>
               </InfoItem>
               <InfoItem>
-                <InfoIcon style={{background:"#F1E8FD"}}><FontAwesomeIcon icon={faUsers} style={{ color: "#8435e0" }} /></InfoIcon>
+                <InfoIcon style={{ background: "#F1E8FD" }}><FontAwesomeIcon icon={faUsers} style={{ color: "#8435e0" }} /></InfoIcon>
                 <InfoText>
                   <InfoTitle>모집인원</InfoTitle>
                   <InfoContents>{data.total_people}명 (잔여 {data.current_people}명)</InfoContents>
@@ -318,14 +318,18 @@ function DetailPage() {
 
           <Container>
             <SubTitle>참여자 목록</SubTitle>
-            <UserSection />
-            <UserSection />
-            <UserSection />
+            {participants.length === 0 ? (
+              <InfoTitle>아직 참여자가 없습니다.</InfoTitle>
+            ) : (
+              participants.map((p) => (
+                <UserSection key={p.id} participant={p} />
+              ))
+            )}
           </Container>
 
         </LeftPage>
         <RightPage>
-          <ApplyContainer />
+          <ApplyContainer data={data} />
         </RightPage>
       </PageWrap>
     </>
