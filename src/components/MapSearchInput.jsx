@@ -85,7 +85,7 @@ export default function MapSearchInput({
       <div style={{ display: "flex", gap: 8 }}>
         <input
           className={styles.input}
-          placeholder={ready ? placeholder : "지도 로드 중..."}
+          placeholder={placeholder}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           onFocus={() => setTouched(true)}
