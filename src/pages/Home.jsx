@@ -28,26 +28,6 @@ function Home() {
   );
 };
 
-=======
-  return (
-    <>
-      <div className="recruit-text">
-        <h1>카풀 모집</h1>
-        <p className="with-text">함께 이용할 동승자를 찾아보세요</p>
-      </div>
-      <div className="addallign">
-        <input type="text" className="search" placeholder="검색"></input>
-        {/* ✅ create 페이지로 이동 */}
-        <Link to="/create" className="addcar as-button">+ 게시글 추가</Link>
-      </div>
-
-      <br />
-
-      <Card data={data} />
-    </>
-  );
-};
-
 function Card({ data }) {
   if (!Array.isArray(data)) return null;
 
