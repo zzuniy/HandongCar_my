@@ -9,7 +9,7 @@ export default function MapSearchInput({
   value,        // {name,address,lat,lng} | null
   onChange,     // (placeObj|null) => void
   disabled,
-  defaultCenter // {lat,lng} 선택사항 (예: 한동대 좌표)
+  defaultCenter // {lat,lng} 선택사항 (예: 한동대 좌표) 
 }) {
   const { ready, err } = useKakaoLoader(process.env.REACT_APP_KAKAO_APP_KEY);
   const [keyword, setKeyword] = useState(value?.name || "");
