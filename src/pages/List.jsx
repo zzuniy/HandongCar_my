@@ -74,7 +74,11 @@ function Card({data}){
               <button
               onClick={() => navigate("/update")}
               ><FaEdit /></button>
-              <button><FaTrash /></button>
+              
+              <button
+              onClick={() => navigate("/list")}
+              ><FaTrash /></button>
+
             </div>
           </div>
 
