@@ -2,13 +2,15 @@ import React, {useEffect , useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 import MapPreview from "./MapPreview";
-
+import { useNavigate } from "react-router-dom";
+import CarpoolSlideshow from "./CarpoolSlideshow";
 import './list.css';
 import { FaUser,FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
 
 
 
 function Home(){
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -41,7 +43,12 @@ function Home(){
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button className="addcar">+ 게시글 추가</button>
+        <button 
+          className="addcar" 
+          onClick={() => navigate("/create")}
+        >
+          + 게시글 추가
+        </button>
       </div>
    
       <br/>
@@ -52,6 +59,7 @@ function Home(){
 };
 
 function Card({data}){
+  const navigate = useNavigate();
     if (!Array.isArray(data)) return null; 
     
   return(
@@ -81,7 +89,13 @@ function Card({data}){
             destLat={item.dest_lat}
             destLng={item.dest_lng}
           />
-          <button className="detail">상세보기</button>
+          <button 
+            className="detail" 
+            onClick={() => navigate("/detail")}
+          >
+            상세보기
+          </button>
+
         </div>
       ))}
     </div>

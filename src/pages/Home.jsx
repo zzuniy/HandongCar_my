@@ -5,7 +5,7 @@ import carpoolImg from "./carpool.png";
 import './Home.css';
 import { FaUser, FaEdit, FaTrash, FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt, FaUniversity } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
+import CarpoolSlideshow from "./CarpoolSlideshow";
 
 
 function Home(){
@@ -40,7 +40,8 @@ function Home(){
 
    </div>
    <div className="right-image">
-        <img src={carpoolImg} alt="카풀 이미지" className="carpool-img" />
+        
+          <CarpoolSlideshow /> 
    </div>
    </div>
     </>
