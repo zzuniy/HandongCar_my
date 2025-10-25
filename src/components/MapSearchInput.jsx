@@ -9,7 +9,6 @@ export default function CreatePage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
 
-  // 폼 상태
   const [form, setForm] = useState({
     host_nickname: "",
     host_phone: "",
@@ -29,7 +28,6 @@ export default function CreatePage() {
     password: "",
   });
 
-  // 에러 상태
   const [errors, setErrors] = useState({
     host_nickname: "",
     host_phone: "",
@@ -47,7 +45,6 @@ export default function CreatePage() {
   const toInt = (v, fb = 0) => (Number.isFinite(+v) ? +v : fb);
   const phoneRe = /^01[0-9]-\d{3,4}-\d{4}$/; // 010-1234-5678
 
-  // 유효성 검사
   const validate = (f) => {
     const e = {
       host_nickname: "",
@@ -64,28 +61,27 @@ export default function CreatePage() {
     const under100 = (s) => (s?.length ?? 0) < 100;
     const nickUnder10 = (s) => (s?.length ?? 0) < 10;
 
-    // 닉네임
     if (!f.host_nickname) e.host_nickname = "닉네임을 입력하세요.";
-    else if (!nickUnder10(f.host_nickname)) e.host_nickname = "닉네임은 10자 미만이어야 합니다.";
+    else if (!nickUnder10(f.host_nickname))
+      e.host_nickname = "닉네임은 10자 미만이어야 합니다.";
 
-    // 전화번호
     if (!f.host_phone) e.host_phone = "전화번호를 입력하세요.";
-    else if (!phoneRe.test(f.host_phone)) e.host_phone = "전화번호 형식(010-1234-5678)으로 입력하세요.";
+    else if (!phoneRe.test(f.host_phone))
+      e.host_phone = "전화번호 형식(010-1234-5678)으로 입력하세요.";
 
-    // 출발/도착 텍스트
     if (!f.start_point) e.start_point = "출발지를 선택해 주세요.";
-    else if (!under100(f.start_point)) e.start_point = "출발지는 100자 미만이어야 합니다.";
+    else if (!under100(f.start_point))
+      e.start_point = "출발지는 100자 미만이어야 합니다.";
 
     if (!f.destination) e.destination = "도착지를 선택해 주세요.";
-    else if (!under100(f.destination)) e.destination = "도착지는 100자 미만이어야 합니다.";
+    else if (!under100(f.destination))
+      e.destination = "도착지는 100자 미만이어야 합니다.";
 
-    // 좌표(목록 선택했는지)
     if (f.start_point && (f.start_lat == null || f.start_lng == null))
       e.start_lat = "출발지 좌표가 없습니다. 목록에서 장소를 선택하세요.";
     if (f.destination && (f.dest_lat == null || f.dest_lng == null))
       e.dest_lat = "도착지 좌표가 없습니다. 목록에서 장소를 선택하세요.";
 
-    // 날짜/시간
     if (!f.date) e.date = "날짜를 선택하세요.";
     if (!f.time) e.time = "시간을 선택하세요.";
 
@@ -93,10 +89,9 @@ export default function CreatePage() {
     if (!f.password) e.password = "비밀번호는 필수입니다.";
 
     setErrors(e);
-    return e; // 맵 그대로 반환
+    return e; // 에러 맵
   };
 
-  // 일반 인풋 변경
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => {
@@ -126,14 +121,11 @@ export default function CreatePage() {
     });
   };
 
-  // 제출
   const onSubmit = async (e) => {
     e.preventDefault();
     const eMap = validate(form);
     const firstInvalid = Object.keys(eMap).find((k) => eMap[k]);
     if (firstInvalid) {
-      alert("입력값을 확인하세요.");
-      // 첫 에러 위치로 스크롤
       document.getElementById(firstInvalid)?.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -144,7 +136,7 @@ export default function CreatePage() {
     const total = toInt(form.total_people, 2);
     const curr = toInt(form.current_people, 0);
     if (curr > total) {
-      alert("현재 인원이 정원을 초과했습니다.");
+      // 필요하면 total_people에 별도 에러 스타일을 걸어도 됨
       return;
     }
 
@@ -154,23 +146,23 @@ export default function CreatePage() {
       current_people: curr,
       status: "모집 중",
     };
-    delete payload.nickname; // 혹시 섞여들어온 키 대비
+    delete payload.nickname;
 
     try {
       setSubmitting(true);
       const { data } = await createPost(payload);
-      alert("등록 완료!");
       navigate(`/detail/${data?.id ?? ""}`, { replace: true });
     } catch (err) {
       console.error("[POST ERROR]", err?.response?.status, err?.message, err?.response?.data);
-      alert("등록에 실패했습니다.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  // 에러 스타일 공통
-  const errStyle = { border: "1.5px solid #e46a6a", boxShadow: "0 0 4px rgba(228,106,106,.25)" };
+  const errStyle = {
+    border: "1.5px solid #e46a6a",
+    boxShadow: "0 0 4px rgba(228,106,106,.25)",
+  };
 
   return (
     <PageShell>
@@ -180,8 +172,10 @@ export default function CreatePage() {
         <form className={styles.form} onSubmit={onSubmit} noValidate>
           {/* 1) 닉네임 / 전화번호 */}
           <div className={styles.row2}>
-            <div className={styles.field}>
-              <label htmlFor="host_nickname" className={styles.label}>닉네임 (10자 미만)</label>
+            <div className={styles.field} id="host_nickname">
+              <label htmlFor="host_nickname" className={styles.label}>
+                닉네임 (10자 미만)
+              </label>
               <input
                 id="host_nickname"
                 className={styles.input}
@@ -192,12 +186,18 @@ export default function CreatePage() {
                 disabled={submitting}
                 style={errors.host_nickname ? errStyle : {}}
               />
-              <span className={styles.counter}>{(form.host_nickname || "").length}/10</span>
-              {errors.host_nickname && <p className={styles.error}>{errors.host_nickname}</p>}
+              <span className={styles.counter}>
+                {(form.host_nickname || "").length}/10
+              </span>
+              {errors.host_nickname && (
+                <p className={styles.error}>{errors.host_nickname}</p>
+              )}
             </div>
 
-            <div className={styles.field}>
-              <label htmlFor="host_phone" className={styles.label}>전화번호</label>
+            <div className={styles.field} id="host_phone">
+              <label htmlFor="host_phone" className={styles.label}>
+                전화번호
+              </label>
               <input
                 id="host_phone"
                 className={styles.input}
@@ -208,14 +208,18 @@ export default function CreatePage() {
                 disabled={submitting}
                 style={errors.host_phone ? errStyle : {}}
               />
-              {errors.host_phone && <p className={styles.error}>{errors.host_phone}</p>}
+              {errors.host_phone && (
+                <p className={styles.error}>{errors.host_phone}</p>
+              )}
             </div>
           </div>
 
           {/* 2) 날짜 / 시간 */}
           <div className={styles.row2}>
-            <div className={styles.field}>
-              <label htmlFor="date" className={styles.label}>날짜</label>
+            <div className={styles.field} id="date">
+              <label htmlFor="date" className={styles.label}>
+                날짜
+              </label>
               <input
                 id="date"
                 className={styles.input}
@@ -228,8 +232,10 @@ export default function CreatePage() {
               />
               {errors.date && <p className={styles.error}>{errors.date}</p>}
             </div>
-            <div className={styles.field}>
-              <label htmlFor="time" className={styles.label}>시간</label>
+            <div className={styles.field} id="time">
+              <label htmlFor="time" className={styles.label}>
+                시간
+              </label>
               <input
                 id="time"
                 className={styles.input}
@@ -244,7 +250,7 @@ export default function CreatePage() {
             </div>
           </div>
 
-          {/* 3) 출발지 / 도착지 (카카오 장소검색) */}
+          {/* 3) 출발지 / 도착지 */}
           <div id="start_point">
             <MapSearchInput
               label="출발지 (검색 후 선택)"
@@ -294,7 +300,9 @@ export default function CreatePage() {
           {/* 4) 정원 */}
           <div className={styles.row2}>
             <div className={styles.field}>
-              <label htmlFor="total_people" className={styles.label}>정원</label>
+              <label htmlFor="total_people" className={styles.label}>
+                정원
+              </label>
               <select
                 id="total_people"
                 className={styles.select}
@@ -311,8 +319,10 @@ export default function CreatePage() {
           </div>
 
           {/* 비고 */}
-          <div className={styles.field}>
-            <label htmlFor="note" className={styles.label}>비고 (100자 미만)</label>
+          <div className={styles.field} id="note">
+            <label htmlFor="note" className={styles.label}>
+              비고 (100자 미만)
+            </label>
             <textarea
               id="note"
               className={styles.textarea}
@@ -324,13 +334,17 @@ export default function CreatePage() {
               disabled={submitting}
               style={errors.note ? errStyle : {}}
             />
-            <span className={styles.counter}>{(form.note || "").length}/100</span>
+            <span className={styles.counter}>
+              {(form.note || "").length}/100
+            </span>
             {errors.note && <p className={styles.error}>{errors.note}</p>}
           </div>
 
           {/* 비밀번호 */}
-          <div className={styles.field}>
-            <label htmlFor="password" className={styles.label}>비밀번호 (필수)</label>
+          <div className={styles.field} id="password">
+            <label htmlFor="password" className={styles.label}>
+              비밀번호 (필수)
+            </label>
             <input
               id="password"
               className={styles.input}
@@ -341,7 +355,9 @@ export default function CreatePage() {
               disabled={submitting}
               style={errors.password ? errStyle : {}}
             />
-            {errors.password && <p className={styles.error}>{errors.password}</p>}
+            {errors.password && (
+              <p className={styles.error}>{errors.password}</p>
+            )}
           </div>
 
           {/* 제출 */}
