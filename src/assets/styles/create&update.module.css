@@ -197,3 +197,10 @@ h1{ margin:0 0 18px; font-size:24px; }
 /* 개별 아이템 */
 .dropdownItem { padding: 10px 8px; border-radius: 8px; cursor: pointer; }
 .dropdownItem:hover { background: #f7f8fb; }
+
+.input.error,
+.textarea.error,
+.select.error {
+  border: 1.5px solid #e46a6a;
+  box-shadow: 0 0 4px rgba(228, 106, 106, 0.3);
+}
