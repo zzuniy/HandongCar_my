@@ -72,12 +72,8 @@ function Card({data}){
             </span>
             <div className="card-actions">
               <button
-              onClick={() => navigate("/update")}
+              onClick={() => navigate("/update/:id")}
               ><FaEdit /></button>
-              
-              <button
-              onClick={() => navigate("/list")}
-              ><FaTrash /></button>
 
             </div>
           </div>

@@ -17,7 +17,7 @@ export default function App() {
           <Route path="/create" element={<CreatePage />} />
           <Route path="/update/:id" element={<UpdatePage />} />
           <Route path="/list" element={<ListPage />} />
-          <Route path="/list/:id" element={<ListPage />} />
+      <Route path="/list/:id" element={<ListPage />} />
 
 
         </Route>
