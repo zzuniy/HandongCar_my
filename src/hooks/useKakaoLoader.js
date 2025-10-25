@@ -1,58 +1,62 @@
+// src/hooks/useKakaoLoader.js
 import { useEffect, useState } from "react";
 
-export default function useKakaoLoader() {
-  const [ready, setReady] = useState(!!window.kakao?.maps);
+/**
+ * Kakao Maps SDK 로더
+ * - autoload=false로 불러오고 kakao.maps.load() 이후 ready=true
+ * - libraries=services 필수(장소검색)
+ */
+export default function useKakaoLoader(appKey) {
+  const [ready, setReady] = useState(false);
+  const [err, setErr] = useState(null);
 
   useEffect(() => {
-    if (ready) return;
-
-    // ✅ Vite와 CRA 모두 지원
-    const appKey =
-      (typeof import.meta !== "undefined" && import.meta.env?.VITE_KAKAO_APP_KEY) ||
-      process.env.REACT_APP_KAKAO_APP_KEY;
-
-    // 디버그 로그 (빌드 전용 상수라 보안상 큰 문제 없음 / 배포 땐 지워도 OK)
-    // 콘솔에 undefined가 찍히면 .env를 못 읽는 것
-    // eslint-disable-next-line no-console
-    console.log("[Kakao] appKey =", appKey ? "(loaded)" : "undefined");
-
+    // 이미 로드된 경우
+    if (window.kakao?.maps && window.kakao.maps.services) {
+      setReady(true);
+      return;
+    }
     if (!appKey) {
-      console.warn("[Kakao] 앱 키가 없습니다. .env에 REACT_APP_KAKAO_APP_KEY 또는 VITE_KAKAO_APP_KEY를 설정하세요.");
+      setErr(new Error("Kakao APP KEY 누락"));
       return;
     }
 
-    // 이미 로드/로딩 중인 스크립트 있으면 재사용
-    const existed = document.querySelector('script[data-kakao-maps]');
-    if (existed) {
-      if (window.kakao?.maps) {
-        setReady(true);
-      } else {
-        existed.addEventListener("load", () => setReady(!!window.kakao?.maps), { once: true });
-      }
-      return;
-    }
+    const id = "kakao-sdk";
+    const exist = document.getElementById(id);
+    if (exist) return;
 
     const script = document.createElement("script");
+    // services 필수, autoload=false
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false&libraries=services`;
     script.async = true;
-    script.defer = true;
-    script.setAttribute("data-kakao-maps", "true");
+    script.id = id;
 
     script.onload = () => {
-      // eslint-disable-next-line no-console
-      console.log("[Kakao] SDK script loaded, calling kakao.maps.load()");
+      if (!window.kakao?.maps) {
+        setErr(new Error("kakao.maps 로드 실패"));
+        return;
+      }
       window.kakao.maps.load(() => {
-        // eslint-disable-next-line no-console
-        console.log("[Kakao] kakao.maps loaded");
-        setReady(true);
+        // services까지 준비되었는지 재확인
+        if (window.kakao.maps.services) {
+          setReady(true);
+        } else {
+          setErr(new Error("services 라이브러리 로드 실패"));
+        }
       });
     };
+
     script.onerror = () => {
-      console.error("[Kakao] SDK 로드 실패. 네트워크 / 도메인 허용 / 키 확인 필요");
+      setErr(new Error("Kakao SDK 스크립트 로드 실패"));
     };
 
     document.head.appendChild(script);
-  }, [ready]);
 
-  return ready;
+    return () => {
+      // 스크립트 제거는 개발 중 중복 방지용
+      // 프로덕션에서는 보통 유지
+    };
+  }, [appKey]);
+
+  return { ready, err };
 }
