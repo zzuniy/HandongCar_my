@@ -1,6 +1,7 @@
 import React, {useEffect , useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
+import MapPreview from "./MapPreview";
 
 import './list.css';
 import { FaUser,FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
@@ -58,7 +59,12 @@ function Card({data}){
             <p><FaUserFriends /> {item.current_people}/{item.total_people}</p>
             
           </div>
-
+          <MapPreview
+            startLat={item.start_lat}
+            startLng={item.start_lng}
+            destLat={item.dest_lat}
+            destLng={item.dest_lng}
+          />
           <button className="detail">상세보기</button>
         </div>
       ))}
@@ -68,3 +74,5 @@ function Card({data}){
 
 
 export default Home;
+
+
