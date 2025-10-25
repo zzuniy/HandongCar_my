@@ -1,5 +1,5 @@
 // src/pages/create.jsx
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPost } from "../api";
 import styles from "../assets/styles/create&update.module.css";
@@ -29,6 +29,18 @@ export default function CreatePage() {
     password: ""
   });
 
+  // 1) 마운트/언마운트 로그
+useEffect(() => {
+  console.warn("[Create] mounted");
+  return () => console.warn("[Create] unmounted");
+}, []);
+
+// 2) form 변경 로그 + 전역으로 노출
+useEffect(() => {
+  console.warn("[Create] form:", form);
+  window.__form = form; // 콘솔에서 __form로 직접 확인 가능
+}, [form]);
+
   const [errors, setErrors] = useState({
     host_nickname: "",
     start_point: "",
@@ -36,6 +48,10 @@ export default function CreatePage() {
     note: "",
     password: ""
   });
+
+  useEffect(() => {
+    console.log("form 변화:", form);
+  }, [form]);
 
   const numericKeys = useMemo(() => ["total_people", "current_people"], []);
   const toInt = (v, fb = 0) => (Number.isFinite(+v) ? +v : fb);

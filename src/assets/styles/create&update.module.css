@@ -204,3 +204,6 @@ h1{ margin:0 0 18px; font-size:24px; }
   border: 1.5px solid #e46a6a;
   box-shadow: 0 0 4px rgba(228, 106, 106, 0.3);
 }
+
+.field { position: relative; }
+.card, .form { overflow: visible; }
