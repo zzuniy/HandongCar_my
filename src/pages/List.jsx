@@ -1,14 +1,18 @@
 import React, {useEffect , useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
+import MapPreview from "./MapPreview";
+import { useNavigate } from "react-router-dom";
 
-import './Home.css';
+import './list.css';
 import { FaUser,FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
 
 
 
 function Home(){
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
     fetch("https://68f63d016b852b1d6f169327.mockapi.io/posts")
@@ -16,6 +20,14 @@ function Home(){
       .then((result) => setData(result))
       .catch((err) => console.error("API 불러오기 오류:", err));
   }, []);
+
+    const filteredData = data.filter((item) => {
+    const start = item.start_point?.toLowerCase() || "";
+    const dest = item.destination?.toLowerCase() || "";
+    const term = searchTerm.toLowerCase();
+    return start.includes(term) || dest.includes(term);
+  });
+
   return(
     <>
         <div className="recruit-text">
@@ -23,18 +35,31 @@ function Home(){
           <p className = "with-text">함께 이용할 동승자를 찾아보세요</p>
         </div>
       <div className="addallign">
-        <input type="text" className="search"placeholder="검색"></input>
-        <button className="addcar">+ 게시글 추가</button>
+    
+        <input
+          type="text"
+          className="search"
+          placeholder="출발지나 도착지 검색"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button 
+          className="addcar" 
+          onClick={() => navigate("/create")}
+        >
+          + 게시글 추가
+        </button>
       </div>
    
       <br/>
   
-     <Card data={data}/>
+     <Card data={filteredData} />
     </>
   );
 };
 
 function Card({data}){
+  const navigate = useNavigate();
     if (!Array.isArray(data)) return null; 
     
   return(
@@ -46,8 +71,10 @@ function Card({data}){
               {item.status}
             </span>
             <div className="card-actions">
-              <button><FaEdit /></button>
-              <button><FaTrash /></button>
+              <button
+              onClick={() => navigate("/update/:id")}
+              ><FaEdit /></button>
+
             </div>
           </div>
 
@@ -58,8 +85,19 @@ function Card({data}){
             <p><FaUserFriends /> {item.current_people}/{item.total_people}</p>
             
           </div>
+          <MapPreview
+            startLat={item.start_lat}
+            startLng={item.start_lng}
+            destLat={item.dest_lat}
+            destLng={item.dest_lng}
+          />
+          <button 
+            className="detail" 
+            onClick={() => navigate("/detail/:id")}
+          >
+            상세보기
+          </button>
 
-          <button className="detail">상세보기</button>
         </div>
       ))}
     </div>
@@ -68,3 +106,5 @@ function Card({data}){
 
 
 export default Home;
+
+
