@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import carpool1 from "./carpool.png";
-import carpool2 from "./carpool2.png";
+import carpool1 from "../assets/styles/carpool.png";
+import carpool2 from "../assets/styles/carpool2.png";
 
 function CarpoolSlideshow() {
   const images = [carpool1, carpool2];

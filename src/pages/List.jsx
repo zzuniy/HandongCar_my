@@ -3,8 +3,7 @@ import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 import MapPreview from "./MapPreview";
 import { useNavigate } from "react-router-dom";
-
-import './List.css';
+import '../assets/styles/list.css';
 import { FaUser,FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
 
 

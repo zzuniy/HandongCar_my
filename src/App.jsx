@@ -4,7 +4,7 @@ import Home from './pages/Home';
 import DetailPage from './pages/detail';
 import CreatePage from './pages/create';
 import UpdatePage from './pages/update';
-import ListPage from './pages/List';
+import ListPage from './pages/list';
 import MainLayout from './Layouts/MainLayout';
 
 export default function App() {
