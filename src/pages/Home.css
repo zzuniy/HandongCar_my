@@ -2,7 +2,7 @@
     background-color: #958aed;
     font-size: 14px;
     border-radius: 30px;
-    width: 150px;
+    width: 170px;
     padding: 10px;
     color: white;
     text-align: center;
@@ -46,6 +46,9 @@
   font-size:16px;
   font-weight: bold;
   cursor: pointer;
+}
+.apply-btn:hover{
+     opacity: 0.7;
 }
 .left {
   flex: 1;               
