@@ -65,6 +65,7 @@
     color: #5b5b5b;
 }
 .detail {
+    margin-top: 10px;
     cursor: pointer;
     color: white;
     width: 100%;
