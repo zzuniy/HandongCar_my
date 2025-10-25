@@ -172,3 +172,29 @@ h1{ margin:0 0 18px; font-size:24px; }
 .dropdown { list-style: none; }
 .dropdownItem:hover { background: #f7f8fb; }
 .hint { color: #6b7280; }
+
+/* 부모 컨테이너가 상대 위치 */
+.field { position: relative; }
+
+/* 드롭다운을 떠 있게 */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+
+  z-index: 1000;            /* 카드/모달 위로 */
+  list-style: none;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.06);
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: 8px;
+  padding: 8px;
+}
+
+/* 개별 아이템 */
+.dropdownItem { padding: 10px 8px; border-radius: 8px; cursor: pointer; }
+.dropdownItem:hover { background: #f7f8fb; }
