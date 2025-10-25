@@ -93,7 +93,7 @@ function Card({data}){
           />
           <button 
             className="detail" 
-            onClick={() => navigate("/detail")}
+            onClick={() => navigate("/detail/:id")}
           >
             상세보기
           </button>
