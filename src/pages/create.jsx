@@ -40,6 +40,7 @@ export default function CreatePage() {
   const numericKeys = useMemo(() => ["total_people", "current_people"], []);
   const toInt = (v, fb = 0) => (Number.isFinite(+v) ? +v : fb);
 
+  // 유효성 검사
   const validate = (f) => {
     const e = {
       host_nickname: "",
@@ -67,7 +68,7 @@ export default function CreatePage() {
     if (!f.password) e.password = "비밀번호는 필수입니다.";
 
     setErrors(e);
-    return Object.values(e).every((v) => !v);
+    return e;
   };
 
   const onChange = (e) => {
@@ -81,20 +82,24 @@ export default function CreatePage() {
             : toInt(value, 0)
           : value
       };
-      if (
-        ["host_nickname", "start_point", "destination", "note", "password"].includes(
-          name
-        )
-      )
+      if (["host_nickname", "start_point", "destination", "note", "password"].includes(name)) {
         validate(draft);
+      }
       return draft;
     });
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!validate(form)) {
+    const eMap = validate(form);
+    const invalidKey = Object.keys(eMap).find((k) => eMap[k]);
+    if (invalidKey) {
       alert("입력값을 확인하세요.");
+      // 첫 에러 위치로 스크롤 (해당 id가 존재해야 함)
+      document.getElementById(invalidKey)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
       return;
     }
 
@@ -143,7 +148,7 @@ export default function CreatePage() {
               </label>
               <input
                 id="host_nickname"
-                className={styles.input}
+                className={`${styles.input} ${errors.host_nickname ? styles.error : ""}`}
                 name="host_nickname"
                 value={form.host_nickname}
                 onChange={onChange}
@@ -205,63 +210,51 @@ export default function CreatePage() {
           </div>
 
           {/* 3) 출발지 / 도착지 */}
-          <MapSearchInput
-            label="출발지 (검색 후 선택)"
-            value={form.start_point}
-            placeholder="예: 한동대 정문 / 포항시청 / 주소"
-            onSelect={(p) => {
-              const picked = p.roadAddress || p.address || p.name || "";
-              const trimmed = picked.slice(0, 100);
-              const draft = {
-                ...form,
-                start_point: trimmed,
-                start_lat: p.lat,
-                start_lng: p.lng
-              };
-              setForm(draft);
-              validate(draft);
-            }}
-            classNames={{
-              wrapper: styles.field,
-              label: styles.label,
-              input: styles.input,
-              list: styles.dropdown,
-              item: styles.dropdownItem,
-              hint: styles.hint,
-              error: styles.error
-            }}
-            disabled={false}
-            error={errors.start_point}
-          />
+          <div id="start_point">
+            <MapSearchInput
+              label="출발지 (검색 후 선택)"
+              value={form.start_point} // 문자열로 사용해도 동작
+              placeholder="예: 한동대 정문 / 포항시청 / 주소"
+              onChange={(place) => {
+                if (!place) return;
+                const picked = place.address || place.name || "";
+                const trimmed = picked.slice(0, 100);
+                const draft = {
+                  ...form,
+                  start_point: trimmed,
+                  start_lat: place.lat,
+                  start_lng: place.lng
+                };
+                setForm(draft);
+                validate(draft);
+              }}
+              disabled={false}
+              error={errors.start_point}
+            />
+          </div>
 
-          <MapSearchInput
-            label="도착지 (검색 후 선택)"
-            value={form.destination}
-            placeholder="예: 포항시외버스터미널 / 포항공항 / 주소"
-            onSelect={(p) => {
-              const picked = p.roadAddress || p.address || p.name || "";
-              const trimmed = picked.slice(0, 100);
-              const draft = {
-                ...form,
-                destination: trimmed,
-                dest_lat: p.lat,
-                dest_lng: p.lng
-              };
-              setForm(draft);
-              validate(draft);
-            }}
-            classNames={{
-              wrapper: styles.field,
-              label: styles.label,
-              input: styles.input,
-              list: styles.dropdown,
-              item: styles.dropdownItem,
-              hint: styles.hint,
-              error: styles.error
-            }}
-            disabled={submitting}
-            error={errors.destination}
-          />
+          <div id="destination">
+            <MapSearchInput
+              label="도착지 (검색 후 선택)"
+              value={form.destination}
+              placeholder="예: 포항시외버스터미널 / 포항공항 / 주소"
+              onChange={(place) => {
+                if (!place) return;
+                const picked = place.address || place.name || "";
+                const trimmed = picked.slice(0, 100);
+                const draft = {
+                  ...form,
+                  destination: trimmed,
+                  dest_lat: place.lat,
+                  dest_lng: place.lng
+                };
+                setForm(draft);
+                validate(draft);
+              }}
+              disabled={submitting}
+              error={errors.destination}
+            />
+          </div>
 
           {/* 4) 정원 */}
           <div className={styles.row2}>
@@ -271,7 +264,7 @@ export default function CreatePage() {
               </label>
               <select
                 id="total_people"
-                className={styles.select}
+                className={`${styles.select} ${errors.total_people ? styles.error : ""}`}
                 name="total_people"
                 value={form.total_people}
                 onChange={onChange}
@@ -291,7 +284,7 @@ export default function CreatePage() {
             </label>
             <textarea
               id="note"
-              className={styles.textarea}
+              className={`${styles.textarea} ${errors.note ? styles.error : ""}`}
               name="note"
               rows={4}
               value={form.note}
@@ -312,7 +305,7 @@ export default function CreatePage() {
             </label>
             <input
               id="password"
-              className={styles.input}
+              className={`${styles.input} ${errors.password ? styles.error : ""}`}
               type="password"
               name="password"
               value={form.password}
