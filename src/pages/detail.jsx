@@ -214,25 +214,33 @@ const ApplyBtn = styled.button`
   cursor: pointer;
 `;
 
-function ApplyContainer({ data }) {
+function ApplyContainer({ data, perPerson, routeSummary }) {
   const total = Number(data?.total_people ?? 0);
   const current = Number(data?.current_people ?? 0);
+  const remain = Math.max(0, total - current);
   const percent = total > 0 ? (current / total) * 100 : 0;
+
+  const priceText = perPerson != null ? `${perPerson.toLocaleString()}원` : `-`;
+  const minutes = routeSummary?.duration ? Math.round(routeSummary.duration / 60) : null;
 
   return (
     <>
       <PriceCard>
-        <SubTitle>15000원</SubTitle>
+        <SubTitle>{priceText}</SubTitle>
         <InfoTitle>1인당 요금</InfoTitle>
 
         <SeatsRow>
           <span>잔여좌석</span>
-          <span>{data.current_people}석</span>
+          <span>{remain}석</span>
         </SeatsRow>
         <ProgressTrack>
           <ProgressBar percent={percent} />
         </ProgressTrack>
-
+        {minutes != null && (
+          <InfoTitle style={{ marginTop: 12 }}>
+            예상 소요시간: <b>{minutes}분</b>
+          </InfoTitle>
+        )}
         <ApplyBtn>신청하기</ApplyBtn>
       </PriceCard>
     </>
@@ -241,11 +249,19 @@ function ApplyContainer({ data }) {
 
 
 
+
+
 function DetailPage() {
+
+  const KAKAO_KEY = process.env.REACT_APP_KAKAO_REST_KEY;
 
   const [data, setData] = useState({});
   const [participants, setParticipants] = useState([]);
   const { id } = useParams();
+
+  const [routeSummary, setRouteSummary] = useState(null);
+  const [perPerson, setPerPerson] = useState(0);
+
 
   const randomNumber = Math.floor(Math.random() * 99);
   const randomGender = Math.random() > 0.5 ? "men" : "women";
@@ -277,6 +293,47 @@ function DetailPage() {
     getPostInfo();
     getParticipantsInfo();
   }, [id]);
+
+  const getKaKaoMobility = async (post) => {
+    if (!KAKAO_KEY) {
+      console.warn("Kakao REST Key가 없습니다. .env 설정을 확인하세요.");
+      return;
+    }
+    try {
+      const response = await axios.get(`https://apis-navi.kakaomobility.com/v1/directions`, {
+        headers: {
+          Authorization: `KakaoAK ${KAKAO_KEY}`,
+          "Content-Type": "application/json",
+        },
+        params: {
+          origin: `${post.start_lng},${post.start_lat}`,
+          destination: `${post.dest_lng},${post.dest_lat}`,
+        },
+      });
+
+      console.log(response.data);
+
+      const route = response?.data?.routes?.[0];
+      if (!route || route.result_code !== 0) return;
+
+      const sum = route.summary;
+      setRouteSummary(sum);
+
+      const capacity = Number(post.total_people ?? 1);
+      const split = Math.max(1, capacity);
+      const per = sum?.fare?.taxi ? Math.round(sum.fare.taxi / split) : null;
+      setPerPerson(per);
+
+    } catch (error) {
+      console.error("카카오 API 호출 오류:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (data?.start_lat && data?.start_lng && data?.dest_lat && data?.dest_lng) {
+      getKaKaoMobility(data);
+    }
+  }, [data]);
 
   return (
     <>
@@ -312,7 +369,7 @@ function DetailPage() {
                 <InfoIcon style={{ background: "#F1E8FD" }}><FontAwesomeIcon icon={faUsers} style={{ color: "#8435e0" }} /></InfoIcon>
                 <InfoText>
                   <InfoTitle>모집인원</InfoTitle>
-                  <InfoContents>{data.total_people}명 (잔여 {data.current_people}명)</InfoContents>
+                  <InfoContents>{data.total_people}명 (잔여 {Math.max(0, (data.total_people ?? 0) - (data.current_people ?? 0))}명)</InfoContents>
                 </InfoText>
               </InfoItem>
             </InfoGrid>
@@ -343,7 +400,7 @@ function DetailPage() {
 
         </LeftPage>
         <RightPage>
-          <ApplyContainer data={data} />
+          <ApplyContainer data={data} perPerson={perPerson} routeSummary={routeSummary} />
         </RightPage>
       </PageWrap>
     </>
