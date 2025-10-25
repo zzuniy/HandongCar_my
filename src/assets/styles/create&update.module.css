@@ -169,7 +169,6 @@ h1{ margin:0 0 18px; font-size:24px; }
 }
 
 /* 드롭다운 기본 */
-.dropdown { list-style: none; }
 .dropdownItem:hover { background: #f7f8fb; }
 .hint { color: #6b7280; }
 

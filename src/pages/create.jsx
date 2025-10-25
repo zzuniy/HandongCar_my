@@ -11,7 +11,7 @@ export default function CreatePage(){
 
   const [form,setForm] = useState({
     // 1) 첫 줄
-    nickname:"",                // ✅ 호스트닉네임 대신 닉네임
+    host_nickname:"",                // ✅ 변수이름은 그대로 호스트닉네임으로 씀
     host_phone:"",
 
     // 2) 날짜/시간
@@ -34,18 +34,18 @@ export default function CreatePage(){
   });
 
   const [errors,setErrors] = useState({
-    nickname:"", start_point:"", destination:"", note:"", password:""
+    host_nickname:"", start_point:"", destination:"", note:"", password:""
   });
 
   const numericKeys = useMemo(()=>["total_people","current_people"],[]);
   const toInt = (v,fb=0)=>Number.isFinite(+v)?+v:fb;
 
   const validate = (f)=>{
-    const e = { nickname:"", start_point:"", destination:"", note:"", password:"" };
+    const e = { host_nickname:"", start_point:"", destination:"", note:"", password:"" };
     const under100 = (s)=> (s?.length??0) < 100;  // 100자 '미만'
     const nickUnder10 = (s)=> (s?.length??0) < 10; // 10자 '미만'
 
-    if(!f.nickname || !nickUnder10(f.nickname)) e.nickname = "닉네임은 10자 미만이어야 합니다.";
+    if(!f.host_nickname || !nickUnder10(f.host_nickname)) e.host_nickname = "닉네임은 10자 미만이어야 합니다.";
 
     // 주소 선택 강제
     if(!f.start_point) e.start_point = "출발지를 선택해 주세요.";
