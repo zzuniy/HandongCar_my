@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import "./Header.css";
+import { FaCar } from "react-icons/fa";
 
 function Header() {
   return (
@@ -8,8 +9,8 @@ function Header() {
 
       <div className="logo">
         <Link to="/" className="logo-link">
-          <div className="logo-icon-bg">
-            <i className="fa-solid fa-car"></i>
+         <div className="logo-icon-bg">
+            <FaCar size={24} color="#fff" />
           </div>
           <span className="logo-text">한동카</span>
         </Link>
