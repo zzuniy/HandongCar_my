@@ -1,385 +1,243 @@
-// src/pages/create.jsx
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createPost } from "../api";
+// src/components/MapSearchInput.jsx
+import { useEffect, useMemo, useRef, useState } from "react";
+import useKakaoLoader from "../hooks/useKakaoLoader";
 import styles from "../assets/styles/create&update.module.css";
-import MapSearchInput from "../components/MapSearchInput";
 
-export default function CreatePage() {
-  const navigate = useNavigate();
-  const [submitting, setSubmitting] = useState(false);
+/**
+ * props:
+ * - value: string (선택된 장소 텍스트)
+ * - onChange: (place|null) => void
+ *   place = { name, address, lat, lng }
+ * - invalid: boolean (빨간 테두리)
+ * - error: string (에러 메시지)
+ */
+export default function MapSearchInput({
+  label = "장소",
+  placeholder = "건물/장소명으로 검색",
+  value = "",
+  onChange,
+  disabled = false,
+  invalid = false,
+  error = "",
+}) {
+  const { ready, err } = useKakaoLoader(process.env.REACT_APP_KAKAO_APP_KEY);
 
-  const [form, setForm] = useState({
-    host_nickname: "",
-    host_phone: "",
-    date: "",
-    time: "",
-    start_point: "",
-    destination: "",
-    start_lat: null,
-    start_lng: null,
-    dest_lat: null,
-    dest_lng: null,
-    total_people: 2,
-    total_time: "",
-    current_people: 0,
-    status: "모집 중",
-    note: "",
-    password: "",
-  });
+  const [q, setQ] = useState(value || "");
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [items, setItems] = useState([]);
+  const [hl, setHl] = useState(-1);
+  const [composing, setComposing] = useState(false);
 
-  const [errors, setErrors] = useState({
-    host_nickname: "",
-    host_phone: "",
-    start_point: "",
-    destination: "",
-    start_lat: "",
-    dest_lat: "",
-    date: "",
-    time: "",
-    note: "",
-    password: "",
-  });
+  const placesRef = useRef(null);
+  const inputRef = useRef(null);
 
-  const numericKeys = useMemo(() => ["total_people", "current_people"], []);
-  const toInt = (v, fb = 0) => (Number.isFinite(+v) ? +v : fb);
-  const phoneRe = /^01[0-9]-\d{3,4}-\d{4}$/; // 010-1234-5678
+  // Kakao Places 준비
+  useEffect(() => {
+    if (!ready || placesRef.current) return;
+    placesRef.current = new window.kakao.maps.services.Places();
+  }, [ready]);
 
-  const validate = (f) => {
-    const e = {
-      host_nickname: "",
-      host_phone: "",
-      start_point: "",
-      destination: "",
-      start_lat: "",
-      dest_lat: "",
-      date: "",
-      time: "",
-      note: "",
-      password: "",
-    };
-    const under100 = (s) => (s?.length ?? 0) < 100;
-    const nickUnder10 = (s) => (s?.length ?? 0) < 10;
+  // 외부 value와 동기화
+  useEffect(() => {
+    setQ(value || "");
+  }, [value]);
 
-    if (!f.host_nickname) e.host_nickname = "닉네임을 입력하세요.";
-    else if (!nickUnder10(f.host_nickname))
-      e.host_nickname = "닉네임은 10자 미만이어야 합니다.";
-
-    if (!f.host_phone) e.host_phone = "전화번호를 입력하세요.";
-    else if (!phoneRe.test(f.host_phone))
-      e.host_phone = "전화번호 형식(010-1234-5678)으로 입력하세요.";
-
-    if (!f.start_point) e.start_point = "출발지를 선택해 주세요.";
-    else if (!under100(f.start_point))
-      e.start_point = "출발지는 100자 미만이어야 합니다.";
-
-    if (!f.destination) e.destination = "도착지를 선택해 주세요.";
-    else if (!under100(f.destination))
-      e.destination = "도착지는 100자 미만이어야 합니다.";
-
-    if (f.start_point && (f.start_lat == null || f.start_lng == null))
-      e.start_lat = "출발지 좌표가 없습니다. 목록에서 장소를 선택하세요.";
-    if (f.destination && (f.dest_lat == null || f.dest_lng == null))
-      e.dest_lat = "도착지 좌표가 없습니다. 목록에서 장소를 선택하세요.";
-
-    if (!f.date) e.date = "날짜를 선택하세요.";
-    if (!f.time) e.time = "시간을 선택하세요.";
-
-    if (!under100(f.note)) e.note = "비고는 100자 미만이어야 합니다.";
-    if (!f.password) e.password = "비밀번호는 필수입니다.";
-
-    setErrors(e);
-    return e; // 에러 맵
-  };
-
-  const onChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => {
-      const draft = {
-        ...prev,
-        [name]: numericKeys.includes(name)
-          ? value === ""
-            ? ""
-            : toInt(value, 0)
-          : value,
-      };
-      if (
-        [
-          "host_nickname",
-          "host_phone",
-          "start_point",
-          "destination",
-          "note",
-          "password",
-          "date",
-          "time",
-        ].includes(name)
-      ) {
-        validate(draft);
+  // 디바운스 검색
+  const search = useMemo(() => {
+    let t;
+    return (kw) => {
+      clearTimeout(t);
+      if (!kw?.trim() || !placesRef.current) {
+        setItems([]);
+        setHl(-1);
+        return;
       }
-      return draft;
-    });
-  };
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    const eMap = validate(form);
-    const firstInvalid = Object.keys(eMap).find((k) => eMap[k]);
-    if (firstInvalid) {
-      document.getElementById(firstInvalid)?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-      return;
-    }
-
-    const total = toInt(form.total_people, 2);
-    const curr = toInt(form.current_people, 0);
-    if (curr > total) {
-      // 필요하면 total_people에 별도 에러 스타일을 걸어도 됨
-      return;
-    }
-
-    const payload = {
-      ...form,
-      total_people: total,
-      current_people: curr,
-      status: "모집 중",
+      t = setTimeout(() => {
+        setLoading(true);
+        placesRef.current.keywordSearch(kw, (data, status) => {
+          setLoading(false);
+          if (status === window.kakao.maps.services.Status.OK) {
+            const list = data.slice(0, 8);
+            setItems(list);
+            setHl(list.length ? 0 : -1);
+          } else {
+            setItems([]);
+            setHl(-1);
+          }
+        });
+      }, 180);
     };
-    delete payload.nickname;
+  }, []);
 
-    try {
-      setSubmitting(true);
-      const { data } = await createPost(payload);
-      navigate(`/detail/${data?.id ?? ""}`, { replace: true });
-    } catch (err) {
-      console.error("[POST ERROR]", err?.response?.status, err?.message, err?.response?.data);
-    } finally {
-      setSubmitting(false);
+  // 타이핑 시 검색 (한글 조합 중엔 보류)
+  useEffect(() => {
+    if (!ready) return;
+    const has = q.trim().length > 0;
+    setOpen(has);
+    if (!composing) {
+      if (has) {
+        search(q);
+      } else {
+        setItems([]);
+        setHl(-1);
+      }
+    }
+  }, [q, composing, ready, search]);
+
+  // 선택
+  const pick = (it) => {
+    const place = {
+      name: it.place_name,
+      address: it.road_address_name || it.address_name || "",
+      lat: parseFloat(it.y),
+      lng: parseFloat(it.x),
+    };
+    setQ(place.name);
+    setItems([]);
+    setOpen(false);
+    setHl(-1);
+    onChange?.(place);
+  };
+
+  // 지우기
+  const clear = () => {
+    setQ("");
+    setItems([]);
+    setOpen(false);
+    setHl(-1);
+    onChange?.(null);
+    inputRef.current?.focus();
+  };
+
+  // 키보드 네비게이션
+  const onKeyDown = (e) => {
+    if (!open || items.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHl((p) => (p + 1) % items.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHl((p) => (p - 1 + items.length) % items.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (hl >= 0) pick(items[hl]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
     }
   };
 
-  const errStyle = {
-    border: "1.5px solid #e46a6a",
-    boxShadow: "0 0 4px rgba(228,106,106,.25)",
-  };
-
-  return (
-    <PageShell>
-      <div className={styles.card}>
-        <h1>같이카 등록</h1>
-
-        <form className={styles.form} onSubmit={onSubmit} noValidate>
-          {/* 1) 닉네임 / 전화번호 */}
-          <div className={styles.row2}>
-            <div className={styles.field} id="host_nickname">
-              <label htmlFor="host_nickname" className={styles.label}>
-                닉네임 (10자 미만)
-              </label>
-              <input
-                id="host_nickname"
-                className={styles.input}
-                name="host_nickname"
-                value={form.host_nickname}
-                onChange={onChange}
-                maxLength={10}
-                disabled={submitting}
-                style={errors.host_nickname ? errStyle : {}}
-              />
-              <span className={styles.counter}>
-                {(form.host_nickname || "").length}/10
-              </span>
-              {errors.host_nickname && (
-                <p className={styles.error}>{errors.host_nickname}</p>
-              )}
-            </div>
-
-            <div className={styles.field} id="host_phone">
-              <label htmlFor="host_phone" className={styles.label}>
-                전화번호
-              </label>
-              <input
-                id="host_phone"
-                className={styles.input}
-                name="host_phone"
-                value={form.host_phone}
-                onChange={onChange}
-                placeholder="010-1234-5678"
-                disabled={submitting}
-                style={errors.host_phone ? errStyle : {}}
-              />
-              {errors.host_phone && (
-                <p className={styles.error}>{errors.host_phone}</p>
-              )}
-            </div>
-          </div>
-
-          {/* 2) 날짜 / 시간 */}
-          <div className={styles.row2}>
-            <div className={styles.field} id="date">
-              <label htmlFor="date" className={styles.label}>
-                날짜
-              </label>
-              <input
-                id="date"
-                className={styles.input}
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={onChange}
-                disabled={submitting}
-                style={errors.date ? errStyle : {}}
-              />
-              {errors.date && <p className={styles.error}>{errors.date}</p>}
-            </div>
-            <div className={styles.field} id="time">
-              <label htmlFor="time" className={styles.label}>
-                시간
-              </label>
-              <input
-                id="time"
-                className={styles.input}
-                type="time"
-                name="time"
-                value={form.time}
-                onChange={onChange}
-                disabled={submitting}
-                style={errors.time ? errStyle : {}}
-              />
-              {errors.time && <p className={styles.error}>{errors.time}</p>}
-            </div>
-          </div>
-
-          {/* 3) 출발지 / 도착지 */}
-          <div id="start_point">
-            <MapSearchInput
-              label="출발지 (검색 후 선택)"
-              value={form.start_point}
-              placeholder="예: 한동대 정문 / 포항시청 / 주소"
-              onChange={(place) => {
-                if (!place) return;
-                const picked = place.address || place.name || "";
-                const draft = {
-                  ...form,
-                  start_point: picked.slice(0, 100),
-                  start_lat: place.lat,
-                  start_lng: place.lng,
-                };
-                setForm(draft);
-                validate(draft);
-              }}
-              disabled={false}
-              invalid={!!(errors.start_point || errors.start_lat)}
-              error={errors.start_point || errors.start_lat}
-            />
-          </div>
-
-          <div id="destination">
-            <MapSearchInput
-              label="도착지 (검색 후 선택)"
-              value={form.destination}
-              placeholder="예: 포항시외버스터미널 / 포항공항 / 주소"
-              onChange={(place) => {
-                if (!place) return;
-                const picked = place.address || place.name || "";
-                const draft = {
-                  ...form,
-                  destination: picked.slice(0, 100),
-                  dest_lat: place.lat,
-                  dest_lng: place.lng,
-                };
-                setForm(draft);
-                validate(draft);
-              }}
-              disabled={submitting}
-              invalid={!!(errors.destination || errors.dest_lat)}
-              error={errors.destination || errors.dest_lat}
-            />
-          </div>
-
-          {/* 4) 정원 */}
-          <div className={styles.row2}>
-            <div className={styles.field}>
-              <label htmlFor="total_people" className={styles.label}>
-                정원
-              </label>
-              <select
-                id="total_people"
-                className={styles.select}
-                name="total_people"
-                value={form.total_people}
-                onChange={onChange}
-                disabled={submitting}
-              >
-                <option value={2}>2명</option>
-                <option value={3}>3명</option>
-                <option value={4}>4명</option>
-              </select>
-            </div>
-          </div>
-
-          {/* 비고 */}
-          <div className={styles.field} id="note">
-            <label htmlFor="note" className={styles.label}>
-              비고 (100자 미만)
-            </label>
-            <textarea
-              id="note"
-              className={styles.textarea}
-              name="note"
-              rows={4}
-              value={form.note}
-              onChange={onChange}
-              maxLength={100}
-              disabled={submitting}
-              style={errors.note ? errStyle : {}}
-            />
-            <span className={styles.counter}>
-              {(form.note || "").length}/100
-            </span>
-            {errors.note && <p className={styles.error}>{errors.note}</p>}
-          </div>
-
-          {/* 비밀번호 */}
-          <div className={styles.field} id="password">
-            <label htmlFor="password" className={styles.label}>
-              비밀번호 (필수)
-            </label>
-            <input
-              id="password"
-              className={styles.input}
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={onChange}
-              disabled={submitting}
-              style={errors.password ? errStyle : {}}
-            />
-            {errors.password && (
-              <p className={styles.error}>{errors.password}</p>
-            )}
-          </div>
-
-          {/* 제출 */}
-          <div className={styles.actions}>
-            <button
-              className={`${styles.button} ${styles.btnGradient}`}
-              type="submit"
-              disabled={submitting}
-            >
-              {submitting ? "등록 중…" : "등록 하기"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </PageShell>
+  // 인풋 스타일 (에러 테두리 강제)
+  const inputStyle = useMemo(
+    () => ({
+      paddingRight: 36, // X 버튼 자리
+      ...(invalid || error
+        ? {
+            border: "1.5px solid #e46a6a",
+            boxShadow: "0 0 4px rgba(228,106,106,.25)",
+          }
+        : {}),
+    }),
+    [invalid, error]
   );
-}
 
-function PageShell({ children }) {
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>{children}</div>
+    <div className={styles.field} style={{ position: "relative" }}>
+      <label className={styles.label}>{label}</label>
+
+      <div style={{ position: "relative" }}>
+        <input
+          ref={inputRef}
+          className={styles.input}
+          placeholder={placeholder}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onFocus={() => {
+            if (q.trim()) setOpen(true);
+          }}
+          onBlur={() => setTimeout(() => setOpen(false), 120)} // blur 지연
+          onKeyDown={onKeyDown}
+          onCompositionStart={() => setComposing(true)}
+          onCompositionEnd={() => setComposing(false)}
+          disabled={disabled || !ready}
+          style={inputStyle}
+          autoComplete="off"
+        />
+
+        {/* 인풋 내부 X 버튼 */}
+        {q && (
+          <button
+            type="button"
+            aria-label="지우기"
+            onMouseDown={(e) => e.preventDefault()} // blur 방지
+            onClick={clear}
+            style={{
+              position: "absolute",
+              right: 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: 24,
+              height: 24,
+              borderRadius: 12,
+              border: "1px solid #e5e7eb",
+              background: "#fff",
+              fontSize: 16,
+              lineHeight: "22px",
+              textAlign: "center",
+              cursor: "pointer",
+              opacity: 0.9,
+            }}
+          >
+            ×
+          </button>
+        )}
+      </div>
+
+      {/* 드롭다운 */}
+      {open && (items.length > 0 || loading) && (
+        <ul
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            zIndex: 10000,
+            background: "#fff",
+            border: "1px solid rgba(230,232,240,.9)",
+            borderRadius: 10,
+            marginTop: 6,
+            maxHeight: 280,
+            overflowY: "auto",
+            boxShadow: "0 10px 28px rgba(22,24,35,.14)",
+          }}
+          onMouseDown={(e) => e.preventDefault()} // 목록 클릭 시 blur 방지
+        >
+          {loading && <li style={{ padding: 12, fontSize: 14 }}>검색 중…</li>}
+          {!loading &&
+            items.map((r, i) => (
+              <li
+                key={r.id}
+                onMouseDown={() => pick(r)} // 1클릭 선택
+                style={{
+                  padding: "10px 12px",
+                  cursor: "pointer",
+                  borderBottom: "1px solid #f3f4f6",
+                  background: i === hl ? "#f5f7ff" : "#fff",
+                }}
+              >
+                <div style={{ fontWeight: 600 }}>{r.place_name}</div>
+                <div style={{ fontSize: 12, color: "#6b7280" }}>
+                  {r.road_address_name || r.address_name}
+                </div>
+              </li>
+            ))}
+        </ul>
+      )}
+
+      {/* 컴포넌트 에러 메시지 */}
+      {(error || err) && (
+        <p className={styles.error}>{error || `카카오 로드 오류: ${err.message}`}</p>
+      )}
     </div>
   );
 }

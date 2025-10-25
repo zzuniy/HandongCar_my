@@ -4,7 +4,7 @@ import { GlobalStyle } from "../assets/styles/StyledComponents";
 import MapPreview from "./MapPreview";
 import { useNavigate } from "react-router-dom";
 
-import './list.css';
+import './List.css';
 import { FaUser,FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
 
 
