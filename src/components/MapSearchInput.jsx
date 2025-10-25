@@ -1,4 +1,3 @@
-// src/components/MapSearchInput.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import useKakaoLoader from "../hooks/useKakaoLoader";
 import styles from "../assets/styles/create&update.module.css";
@@ -6,75 +5,82 @@ import styles from "../assets/styles/create&update.module.css";
 export default function MapSearchInput({
   label = "장소",
   placeholder = "건물/장소명으로 검색",
-  value,
-  onChange,
+  value = "",                // ✅ 문자열(선택된 장소 텍스트)
+  onChange,                  // ✅ (placeObj|null) => void
   disabled = false,
-  defaultCenter
+  defaultCenter              // {lat,lng} optional
 }) {
   const { ready, err } = useKakaoLoader(process.env.REACT_APP_KAKAO_APP_KEY);
-  const [keyword, setKeyword] = useState(value?.name || "");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [touched, setTouched] = useState(false);
-  const placesRef = useRef(null);
-  const mapRef = useRef(null);
 
-  // Kakao Places 인스턴스 준비
+  // 인풋에 보이는 텍스트(타이핑용)
+  const [q, setQ] = useState(value || "");
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [items, setItems] = useState([]);
+
+  const placesRef = useRef(null);
+
+  // Places 인스턴스 준비
   useEffect(() => {
-    if (!window.kakao?.maps || !ready) return;
-    if (!placesRef.current) {
-      const center = new window.kakao.maps.LatLng(
-        defaultCenter?.lat ?? 36.5,
-        defaultCenter?.lng ?? 127.8
-      );
-      const dummyEl = document.createElement("div");
-      const map = new window.kakao.maps.Map(dummyEl, { center, level: 5 });
-      mapRef.current = map;
-      placesRef.current = new window.kakao.maps.services.Places(map);
-    }
+    if (!ready || placesRef.current) return;
+    const center = new window.kakao.maps.LatLng(
+      defaultCenter?.lat ?? 36.5,
+      defaultCenter?.lng ?? 127.8
+    );
+    const dummy = document.createElement("div");
+    const map = new window.kakao.maps.Map(dummy, { center, level: 5 });
+    placesRef.current = new window.kakao.maps.services.Places(map);
   }, [ready, defaultCenter]);
 
-  const debouncedSearch = useMemo(() => {
-    let h;
+  // 외부 value가 바뀌면 인풋 텍스트도 동기화
+  useEffect(() => { setQ(value || ""); }, [value]);
+
+  // 디바운스 검색
+  const search = useMemo(() => {
+    let t;
     return (kw) => {
-      clearTimeout(h);
-      if (!kw?.trim()) { setResults([]); return; }
-      h = setTimeout(() => {
+      clearTimeout(t);
+      if (!kw?.trim()) { setItems([]); return; }
+      t = setTimeout(() => {
         if (!placesRef.current) return;
         setLoading(true);
         placesRef.current.keywordSearch(kw, (data, status) => {
           setLoading(false);
+          // 디버깅 로그 (필요없으면 지워도 됨)
+          // console.log("[Places]", kw, status, data?.length);
           if (status === window.kakao.maps.services.Status.OK) {
-            setResults(data.slice(0, 8));
+            setItems(data.slice(0, 8));
           } else {
-            setResults([]);
+            setItems([]);
           }
         });
       }, 250);
     };
   }, []);
 
-  // 타이핑하면 검색
+  // 인풋 타이핑 시 검색
   useEffect(() => {
-    if (!touched) return;
-    debouncedSearch(keyword);
-  }, [keyword, touched, debouncedSearch]);
+    if (!open) return;
+    search(q);
+  }, [q, open, search]);
 
-  const pick = (item) => {
-    const next = {
-      name: item.place_name,
-      address: item.road_address_name || item.address_name || "",
-      lat: parseFloat(item.y),
-      lng: parseFloat(item.x),
+  // 항목 클릭(여기가 "검색 결과 클릭")
+  const pick = (it) => {
+    const place = {
+      name: it.place_name,
+      address: it.road_address_name || it.address_name || "",
+      lat: parseFloat(it.y),
+      lng: parseFloat(it.x),
     };
-    setKeyword(next.name);
-    setResults([]);
-    onChange?.(next);
+    setQ(place.name);
+    setItems([]);
+    setOpen(false);
+    onChange?.(place); // ✅ 부모로 전달
   };
 
   const clear = () => {
-    setKeyword("");
-    setResults([]);
+    setQ("");
+    setItems([]);
     onChange?.(null);
   };
 
@@ -86,12 +92,12 @@ export default function MapSearchInput({
         <input
           className={styles.input}
           placeholder={placeholder}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onFocus={() => setTouched(true)}
-          // 🔥 수정: 로드 실패해도 입력 가능하게
-          disabled={Boolean(disabled)} 
-          style={{ position: "relative", zIndex: 1001, pointerEvents: "auto" }}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onFocus={() => { setOpen(true); if (q) search(q); }}
+          disabled={disabled}
+          style={{ position: "relative", zIndex: 2, pointerEvents: "auto" }}
+          autoComplete="off"
         />
         {value && (
           <button
@@ -106,15 +112,16 @@ export default function MapSearchInput({
         )}
       </div>
 
-      {(results.length > 0 || loading) && (
+      {/* 검색 결과 드롭다운 */}
+      {open && (items.length > 0 || loading) && (
         <ul
           style={{
             position: "absolute",
-            zIndex: 2000,
             top: "100%",
             left: 0,
             right: 0,
-            background: "white",
+            zIndex: 1000,
+            background: "#fff",
             border: "1px solid rgba(230,232,240,.7)",
             borderRadius: 8,
             marginTop: 6,
@@ -123,13 +130,12 @@ export default function MapSearchInput({
             boxShadow: "0 8px 24px rgba(22,24,35,.12)",
           }}
         >
-          {loading && (
-            <li style={{ padding: 12, fontSize: 14 }}>검색 중…</li>
-          )}
+          {loading && <li style={{ padding: 12, fontSize: 14 }}>검색 중…</li>}
           {!loading &&
-            results.map((r) => (
+            items.map((r) => (
               <li
                 key={r.id}
+                onMouseDown={(e) => e.preventDefault()} // blur 방지
                 onClick={() => pick(r)}
                 style={{
                   padding: "10px 12px",
@@ -144,13 +150,6 @@ export default function MapSearchInput({
               </li>
             ))}
         </ul>
-      )}
-
-      {value && (
-        <p style={{ marginTop: 8, fontSize: 13, color: "#374151" }}>
-          선택됨: <strong>{value.name}</strong>
-          {value.address ? ` · ${value.address}` : ""} · ({value.lat.toFixed(5)}, {value.lng.toFixed(5)})
-        </p>
       )}
 
       {err && <p className={styles.error}>카카오 로드 오류: {err.message}</p>}
