@@ -10,6 +10,7 @@ import { FaUser,FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPho
 
 function Home(){
   const [data, setData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
     fetch("https://68f63d016b852b1d6f169327.mockapi.io/posts")
@@ -17,6 +18,14 @@ function Home(){
       .then((result) => setData(result))
       .catch((err) => console.error("API 불러오기 오류:", err));
   }, []);
+
+    const filteredData = data.filter((item) => {
+    const start = item.start_point?.toLowerCase() || "";
+    const dest = item.destination?.toLowerCase() || "";
+    const term = searchTerm.toLowerCase();
+    return start.includes(term) || dest.includes(term);
+  });
+
   return(
     <>
         <div className="recruit-text">
@@ -24,13 +33,20 @@ function Home(){
           <p className = "with-text">함께 이용할 동승자를 찾아보세요</p>
         </div>
       <div className="addallign">
-        <input type="text" className="search"placeholder="검색"></input>
+    
+        <input
+          type="text"
+          className="search"
+          placeholder="출발지나 도착지 검색"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <button className="addcar">+ 게시글 추가</button>
       </div>
    
       <br/>
   
-     <Card data={data}/>
+     <Card data={filteredData} />
     </>
   );
 };
