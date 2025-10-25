@@ -71,7 +71,9 @@ function Card({data}){
               {item.status}
             </span>
             <div className="card-actions">
-              <button><FaEdit /></button>
+              <button
+              onClick={() => navigate("/update")}
+              ><FaEdit /></button>
               <button><FaTrash /></button>
             </div>
           </div>
