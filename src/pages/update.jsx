@@ -1,6 +1,5 @@
 // src/pages/update.jsx
-// 기존: UpdatePage
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPost, updatePost } from "../api";
 import styles from "../assets/styles/create&update.module.css";
@@ -18,6 +17,7 @@ export default function UpdatePage() {
 
   const [errors, setErrors] = useState({
     host_nickname: "",
+    host_phone: "",
     start_point: "",
     destination: "",
     start_lat: "",
@@ -27,17 +27,19 @@ export default function UpdatePage() {
     note: "",
   });
 
+  const askedRef = useRef(false);
+
   const numericKeys = useMemo(() => ["total_people", "current_people"], []);
   const toInt = (v, fb = 0) => (Number.isFinite(+v) ? +v : fb);
+  const phoneRe = /^01[0-9]-\d{3,4}-\d{4}$/;
+
   const under100 = (s) => (s?.length ?? 0) < 100;
   const nickUnder10 = (s) => (s?.length ?? 0) < 10;
 
-  // StrictMode 이중 마운트 중복 방지
-  const askedRef = useRef(false);
-
-  const validate = (draft) => {
+  const validate = (f) => {
     const e = {
       host_nickname: "",
+      host_phone: "",
       start_point: "",
       destination: "",
       start_lat: "",
@@ -47,27 +49,31 @@ export default function UpdatePage() {
       note: "",
     };
 
-    if (!draft.host_nickname || !nickUnder10(draft.host_nickname))
-      e.host_nickname = "호스트 닉네임은 10자 미만이어야 합니다.";
+    if (!f.host_nickname) e.host_nickname = "닉네임을 입력하세요.";
+    else if (!nickUnder10(f.host_nickname))
+      e.host_nickname = "닉네임은 10자 미만이어야 합니다.";
 
-    if (!draft.start_point) e.start_point = "출발지를 선택해 주세요.";
-    else if (!under100(draft.start_point))
+    if (!f.host_phone) e.host_phone = "전화번호를 입력하세요.";
+    else if (!phoneRe.test(f.host_phone))
+      e.host_phone = "전화번호 형식(010-1234-5678)으로 입력하세요.";
+
+    if (!f.start_point) e.start_point = "출발지를 선택해 주세요.";
+    else if (!under100(f.start_point))
       e.start_point = "출발지는 100자 미만이어야 합니다.";
 
-    if (!draft.destination) e.destination = "도착지를 선택해 주세요.";
-    else if (!under100(draft.destination))
+    if (!f.destination) e.destination = "도착지를 선택해 주세요.";
+    else if (!under100(f.destination))
       e.destination = "도착지는 100자 미만이어야 합니다.";
 
-    // 좌표 필수 (실제 목록 선택 여부 확인)
-    if (draft.start_point && (draft.start_lat == null || draft.start_lng == null))
+    if (f.start_point && (f.start_lat == null || f.start_lng == null))
       e.start_lat = "출발지 좌표가 없습니다. 목록에서 장소를 선택하세요.";
-    if (draft.destination && (draft.dest_lat == null || draft.dest_lng == null))
+    if (f.destination && (f.dest_lat == null || f.dest_lng == null))
       e.dest_lat = "도착지 좌표가 없습니다. 목록에서 장소를 선택하세요.";
 
-    if (!draft.date) e.date = "날짜를 선택하세요.";
-    if (!draft.time) e.time = "시간을 선택하세요.";
+    if (!f.date) e.date = "날짜를 선택하세요.";
+    if (!f.time) e.time = "시간을 선택하세요.";
 
-    if (!under100(draft.note)) e.note = "비고는 100자 미만이어야 합니다.";
+    if (!under100(f.note)) e.note = "비고는 100자 미만이어야 합니다.";
 
     setErrors(e);
     return e;
@@ -110,12 +116,10 @@ export default function UpdatePage() {
         time: data.time ?? "",
         start_point: data.start_point ?? "",
         destination: data.destination ?? "",
-        // 좌표 포함 (없으면 null)
         start_lat: data.start_lat ?? null,
         start_lng: data.start_lng ?? null,
         dest_lat: data.dest_lat ?? null,
         dest_lng: data.dest_lng ?? null,
-
         total_people: toInt(data.total_people, 2),
         total_time: data.total_time ?? "",
         current_people: toInt(data.current_people, 0),
@@ -157,26 +161,30 @@ export default function UpdatePage() {
             : toInt(value, 0)
           : value,
       };
-      if (["host_nickname", "start_point", "destination", "note", "date", "time"].includes(name)) {
+      if (
+        [
+          "host_nickname",
+          "host_phone",
+          "start_point",
+          "destination",
+          "note",
+          "date",
+          "time",
+        ].includes(name)
+      )
         validate(draft);
-      }
       return draft;
     });
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!pwOK) {
-      alert("먼저 비밀번호를 확인하세요.");
-      return;
-    }
-    if (!form) return;
+    if (!pwOK || !form) return;
 
     const eMap = validate(form);
-    const invalidKey = Object.keys(eMap).find((k) => eMap[k]);
-    if (invalidKey) {
-      alert("입력값을 확인하세요.");
-      document.getElementById(invalidKey)?.scrollIntoView({
+    const firstInvalid = Object.keys(eMap).find((k) => eMap[k]);
+    if (firstInvalid) {
+      document.getElementById(firstInvalid)?.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
@@ -185,28 +193,21 @@ export default function UpdatePage() {
 
     const total = toInt(form.total_people, 2);
     const curr = toInt(form.current_people, 0);
-    if (curr > total) {
-      alert("현재 인원보다 작은 정원으로는 저장할 수 없습니다.");
-      return;
-    }
+    if (curr > total) return;
 
     const next = {
       ...form,
       total_people: total,
       current_people: curr,
-      status: form.status ?? "모집 중",
+      status: form.status,
     };
-    // 혹시라도 nickname이 섞여 있으면 제거
-    delete next.nickname;
 
     try {
       setSubmitting(true);
       await updatePost(form.id ?? id, next);
-      alert("수정 완료!");
       navigate(`/detail/${form.id ?? id}`, { replace: true });
     } catch (err) {
       console.error("[PUT ERROR]", err?.response?.status, err?.message, err?.response?.data);
-      alert("수정에 실패했습니다.");
     } finally {
       setSubmitting(false);
     }
@@ -249,6 +250,11 @@ export default function UpdatePage() {
     );
   }
 
+  const errStyle = {
+    border: "1.5px solid #e46a6a",
+    boxShadow: "0 0 4px rgba(228,106,106,.25)",
+  };
+
   return (
     <PageShell>
       <div className={styles.card}>
@@ -257,67 +263,85 @@ export default function UpdatePage() {
         <form className={styles.form} onSubmit={onSubmit} noValidate>
           {/* 1) 닉네임 / 전화번호 */}
           <div className={styles.row2}>
-            <div className={styles.field}>
+            <div className={styles.field} id="host_nickname">
               <label htmlFor="host_nickname" className={styles.label}>
                 호스트 닉네임 (10자 미만)
               </label>
               <input
                 id="host_nickname"
-                className={`${styles.input} ${errors.host_nickname ? styles.error : ""}`}
+                className={styles.input}
                 name="host_nickname"
                 value={form.host_nickname}
                 onChange={onChange}
                 maxLength={10}
                 disabled={submitting}
+                style={errors.host_nickname ? errStyle : {}}
               />
-              <span className={styles.counter}>{(form.host_nickname || "").length}/10</span>
-              {errors.host_nickname && <p className={styles.error}>{errors.host_nickname}</p>}
+              <span className={styles.counter}>
+                {(form.host_nickname || "").length}/10
+              </span>
+              {errors.host_nickname && (
+                <p className={styles.error}>{errors.host_nickname}</p>
+              )}
             </div>
 
-            <div className={styles.field}>
-              <label htmlFor="host_phone" className={styles.label}>전화번호</label>
+            <div className={styles.field} id="host_phone">
+              <label htmlFor="host_phone" className={styles.label}>
+                전화번호
+              </label>
               <input
                 id="host_phone"
                 className={styles.input}
                 name="host_phone"
                 value={form.host_phone}
                 onChange={onChange}
+                placeholder="010-1234-5678"
                 disabled={submitting}
+                style={errors.host_phone ? errStyle : {}}
               />
+              {errors.host_phone && (
+                <p className={styles.error}>{errors.host_phone}</p>
+              )}
             </div>
           </div>
 
           {/* 2) 날짜 / 시간 */}
           <div className={styles.row2}>
-            <div className={styles.field}>
-              <label htmlFor="date" className={styles.label}>날짜</label>
+            <div className={styles.field} id="date">
+              <label htmlFor="date" className={styles.label}>
+                날짜
+              </label>
               <input
                 id="date"
-                className={`${styles.input} ${errors.date ? styles.error : ""}`}
+                className={styles.input}
                 type="date"
                 name="date"
                 value={form.date}
                 onChange={onChange}
                 disabled={submitting}
+                style={errors.date ? errStyle : {}}
               />
               {errors.date && <p className={styles.error}>{errors.date}</p>}
             </div>
-            <div className={styles.field}>
-              <label htmlFor="time" className={styles.label}>시간</label>
+            <div className={styles.field} id="time">
+              <label htmlFor="time" className={styles.label}>
+                시간
+              </label>
               <input
                 id="time"
-                className={`${styles.input} ${errors.time ? styles.error : ""}`}
+                className={styles.input}
                 type="time"
                 name="time"
                 value={form.time}
                 onChange={onChange}
                 disabled={submitting}
+                style={errors.time ? errStyle : {}}
               />
               {errors.time && <p className={styles.error}>{errors.time}</p>}
             </div>
           </div>
 
-          {/* 3) 출발지 / 도착지 (카카오 장소검색) */}
+          {/* 3) 출발지 / 도착지 (카카오 검색) */}
           <div id="start_point">
             <MapSearchInput
               label="출발지 (검색 후 선택)"
@@ -326,10 +350,9 @@ export default function UpdatePage() {
               onChange={(place) => {
                 if (!place) return;
                 const picked = place.address || place.name || "";
-                const trimmed = picked.slice(0, 100);
                 const draft = {
                   ...form,
-                  start_point: trimmed,
+                  start_point: picked.slice(0, 100),
                   start_lat: place.lat,
                   start_lng: place.lng,
                 };
@@ -337,10 +360,9 @@ export default function UpdatePage() {
                 validate(draft);
               }}
               disabled={submitting}
+              invalid={!!(errors.start_point || errors.start_lat)}
+              error={errors.start_point || errors.start_lat}
             />
-            {(errors.start_point || errors.start_lat) && (
-              <p className={styles.error}>{errors.start_point || errors.start_lat}</p>
-            )}
           </div>
 
           <div id="destination">
@@ -351,10 +373,9 @@ export default function UpdatePage() {
               onChange={(place) => {
                 if (!place) return;
                 const picked = place.address || place.name || "";
-                const trimmed = picked.slice(0, 100);
                 const draft = {
                   ...form,
-                  destination: trimmed,
+                  destination: picked.slice(0, 100),
                   dest_lat: place.lat,
                   dest_lng: place.lng,
                 };
@@ -362,15 +383,16 @@ export default function UpdatePage() {
                 validate(draft);
               }}
               disabled={submitting}
+              invalid={!!(errors.destination || errors.dest_lat)}
+              error={errors.destination || errors.dest_lat}
             />
-            {(errors.destination || errors.dest_lat) && (
-              <p className={styles.error}>{errors.destination || errors.dest_lat}</p>
-            )}
           </div>
 
           {/* 4) 정원 */}
           <div className={styles.field}>
-            <label htmlFor="total_people" className={styles.label}>정원</label>
+            <label htmlFor="total_people" className={styles.label}>
+              정원
+            </label>
             <select
               id="total_people"
               className={styles.select}
@@ -386,23 +408,27 @@ export default function UpdatePage() {
           </div>
 
           {/* 비고 */}
-          <div className={styles.field}>
-            <label htmlFor="note" className={styles.label}>비고 (100자 미만)</label>
+          <div className={styles.field} id="note">
+            <label htmlFor="note" className={styles.label}>
+              비고 (100자 미만)
+            </label>
             <textarea
               id="note"
-              className={`${styles.textarea} ${errors.note ? styles.error : ""}`}
+              className={styles.textarea}
               name="note"
               rows={4}
               value={form.note}
               onChange={onChange}
               maxLength={100}
               disabled={submitting}
+              style={errors.note ? errStyle : {}}
             />
-            <span className={styles.counter}>{(form.note || "").length}/100</span>
+            <span className={styles.counter}>
+              {(form.note || "").length}/100
+            </span>
             {errors.note && <p className={styles.error}>{errors.note}</p>}
           </div>
 
-          {/* 제출 */}
           <div className={styles.actions}>
             <button
               className={`${styles.button} ${styles.btnGradient}`}
