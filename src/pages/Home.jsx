@@ -40,7 +40,7 @@ function Home(){
 
    </div>
    <div className="right-image">
-        
+
           <CarpoolSlideshow /> 
    </div>
    </div>

@@ -9,7 +9,7 @@ function CarpoolSlideshow() {
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % images.length);
-    }, 5000); 
+    }, 4500); 
     return () => clearInterval(timer);
   }, []);
 
