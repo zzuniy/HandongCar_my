@@ -1,11 +1,33 @@
 .footer {
-  background-color: #f8f9fa;
-  color: #555;
+  background-color: #111827;
+  color: #e5e7eb;
   text-align: center;
-  padding: 15px 0;
-  border-top: 1px solid #ddd;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
-  font-family: "Pretendard", sans-serif;
-  width: 100%;
-  margin-top: 40px;
+  padding: 2rem 1rem;
+  font-family: 'Pretendard', sans-serif;
+  border-top: 1px solid #1f2937;
+}
+
+.footer-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-bottom: 0.3rem;
+}
+
+.footer-text {
+  color: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+
+.footer-links a:hover {
+  color: #3b82f6;
+}
+
+.footer-bottom {
+  font-size: 0.85rem;
+  color: #6b7280;
+  border-top: 1px solid #1f2937;
+  padding-top: 1rem;
+  margin-top: 1rem;
 }

@@ -3,7 +3,7 @@
     width: 350px;
     border: 1px solid #e6e6e6;
     border-radius: 15px;
-    margin: 1ㄴ0px;
+    margin: 10px;
     padding: 20px;
     transition: transform 0.5s ease, box-shadow 0.5s ease;
 }
@@ -65,6 +65,7 @@
     color: #5b5b5b;
 }
 .detail {
+    margin-top: 10px;
     cursor: pointer;
     color: white;
     width: 100%;
@@ -76,7 +77,6 @@
 .detail:hover{
     opacity: 0.7;
 }
-
 .addcar{
     
      background: linear-gradient(135deg, #6a5af9, #b66bff);
@@ -102,7 +102,7 @@
 .recruit-text{
 
 margin-left: 20px;
-margin-top: 0;
+margin-top: 20px;
 margin-left:30px;
 margin-bottom: 0; 
 }
