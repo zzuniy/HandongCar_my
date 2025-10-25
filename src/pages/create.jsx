@@ -1,8 +1,9 @@
-// src/pages/create.jsx
+// /src/pages/create.jsx
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPost } from "../api";
 import styles from "../assets/styles/create&update.module.css";
+import MapSearchInput from "../components/MapSearchInput";
 
 export default function CreatePage(){
   const navigate = useNavigate();
@@ -16,8 +17,10 @@ export default function CreatePage(){
     // 2) 날짜/시간
     date:"", time:"",
 
-    // 3) 출발/도착
+    // 3) 출발/도착 (주소 + 좌표)
     start_point:"", destination:"",
+    start_lat:null, start_lng:null,
+    dest_lat:null,  dest_lng:null,
 
     // 4) 정원/소요시간
     total_people:2,             // ✅ 2~4만 노출
@@ -43,8 +46,14 @@ export default function CreatePage(){
     const nickUnder10 = (s)=> (s?.length??0) < 10; // 10자 '미만'
 
     if(!f.nickname || !nickUnder10(f.nickname)) e.nickname = "닉네임은 10자 미만이어야 합니다.";
-    if(!under100(f.start_point)) e.start_point = "출발지는 100자 미만이어야 합니다.";
-    if(!under100(f.destination)) e.destination = "도착지는 100자 미만이어야 합니다.";
+
+    // 주소 선택 강제
+    if(!f.start_point) e.start_point = "출발지를 선택해 주세요.";
+    else if(!under100(f.start_point)) e.start_point = "출발지는 100자 미만이어야 합니다.";
+
+    if(!f.destination) e.destination = "도착지를 선택해 주세요.";
+    else if(!under100(f.destination)) e.destination = "도착지는 100자 미만이어야 합니다.";
+
     if(!under100(f.note)) e.note = "비고는 100자 미만이어야 합니다.";
     if(!f.password) e.password = "비밀번호는 필수입니다.";
 
@@ -77,6 +86,12 @@ export default function CreatePage(){
       total_people: total,
       current_people: curr,
       status: "모집 중", // 생성 시 고정
+
+      // 좌표는 null 가능
+      start_lat: form.start_lat ?? null,
+      start_lng: form.start_lng ?? null,
+      dest_lat:  form.dest_lat  ?? null,
+      dest_lng:  form.dest_lng  ?? null,
     };
 
     try{
@@ -155,35 +170,67 @@ export default function CreatePage(){
             </div>
           </div>
 
-          {/* 3) 출발지 / 도착지 */}
+          {/* 3) 출발지 / 도착지 (카카오 장소검색) */}
           <div className={styles.field}>
-            <label htmlFor="start_point" className={styles.label}>출발지 (100자 미만)</label>
-            <input
-              id="start_point"
-              className={styles.input}
-              name="start_point"
+            <MapSearchInput
+              label="출발지 (검색 후 선택)"
               value={form.start_point}
-              onChange={onChange}
-              maxLength={100}
+              placeholder="예: 한동대 정문 / 포항시청 / 주소"
+              onSelect={(p) => {
+                const picked = p.roadAddress || p.address || p.name || "";
+                const trimmed = picked.slice(0, 100);
+                const draft = {
+                  ...form,
+                  start_point: trimmed,
+                  start_lat: p.lat,
+                  start_lng: p.lng
+                };
+                setForm(draft);
+                validate(draft);
+              }}
+              classNames={{
+                wrapper: styles.field,
+                label: styles.label,
+                input: styles.input,
+                list: styles.dropdown,
+                item: styles.dropdownItem,
+                hint: styles.hint,
+                error: styles.error
+              }}
               disabled={submitting}
+              error={errors.start_point}
             />
-            <span className={styles.counter}>{form.start_point.length}/100</span>
-            {errors.start_point && <p className={styles.error}>{errors.start_point}</p>}
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="destination" className={styles.label}>도착지 (100자 미만)</label>
-            <input
-              id="destination"
-              className={styles.input}
-              name="destination"
+            <MapSearchInput
+              label="도착지 (검색 후 선택)"
               value={form.destination}
-              onChange={onChange}
-              maxLength={100}
+              placeholder="예: 포항시외버스터미널 / 포항공항 / 주소"
+              onSelect={(p) => {
+                const picked = p.roadAddress || p.address || p.name || "";
+                const trimmed = picked.slice(0, 100);
+                const draft = {
+                  ...form,
+                  destination: trimmed,
+                  dest_lat: p.lat,
+                  dest_lng: p.lng
+                };
+                setForm(draft);
+                validate(draft);
+              }}
+              classNames={{
+                wrapper: styles.field,
+                label: styles.label,
+                input: styles.input,
+                list: styles.dropdown,
+                item: styles.dropdownItem,
+                hint: styles.hint,
+                error: styles.error
+              }}
               disabled={submitting}
+              error={errors.destination}
             />
-            <span className={styles.counter}>{form.destination.length}/100</span>
-            {errors.destination && <p className={styles.error}>{errors.destination}</p>}
           </div>
 
           {/* 4) 정원 */}
