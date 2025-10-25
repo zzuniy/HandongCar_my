@@ -230,7 +230,7 @@ export default function CreatePage() {
               hint: styles.hint,
               error: styles.error
             }}
-            disabled={submitting}
+            disabled={false}
             error={errors.start_point}
           />
 

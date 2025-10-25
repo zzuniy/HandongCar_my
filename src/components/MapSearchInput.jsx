@@ -6,10 +6,10 @@ import styles from "../assets/styles/create&update.module.css";
 export default function MapSearchInput({
   label = "장소",
   placeholder = "건물/장소명으로 검색",
-  value,        // {name,address,lat,lng} | null
-  onChange,     // (placeObj|null) => void
-  disabled,
-  defaultCenter // {lat,lng} 선택사항 (예: 한동대 좌표) 
+  value,
+  onChange,
+  disabled = false,
+  defaultCenter
 }) {
   const { ready, err } = useKakaoLoader(process.env.REACT_APP_KAKAO_APP_KEY);
   const [keyword, setKeyword] = useState(value?.name || "");
@@ -18,18 +18,16 @@ export default function MapSearchInput({
   const [touched, setTouched] = useState(false);
   const placesRef = useRef(null);
   const mapRef = useRef(null);
-  const markerRef = useRef(null);
 
   // Kakao Places 인스턴스 준비
   useEffect(() => {
-    if (!ready) return;
+    if (!window.kakao?.maps || !ready) return;
     if (!placesRef.current) {
-      // 검색 결과 기준 좌표가 있으면 그걸로, 없으면 한국 중앙부 approx
       const center = new window.kakao.maps.LatLng(
         defaultCenter?.lat ?? 36.5,
         defaultCenter?.lng ?? 127.8
       );
-      const dummyEl = document.createElement("div"); // 보이지 않는 더미 맵
+      const dummyEl = document.createElement("div");
       const map = new window.kakao.maps.Map(dummyEl, { center, level: 5 });
       mapRef.current = map;
       placesRef.current = new window.kakao.maps.services.Places(map);
@@ -47,7 +45,7 @@ export default function MapSearchInput({
         placesRef.current.keywordSearch(kw, (data, status) => {
           setLoading(false);
           if (status === window.kakao.maps.services.Status.OK) {
-            setResults(data.slice(0, 8)); // 상위 8개만
+            setResults(data.slice(0, 8));
           } else {
             setResults([]);
           }
@@ -62,7 +60,6 @@ export default function MapSearchInput({
     debouncedSearch(keyword);
   }, [keyword, touched, debouncedSearch]);
 
-  // 선택 이벤트
   const pick = (item) => {
     const next = {
       name: item.place_name,
@@ -73,9 +70,6 @@ export default function MapSearchInput({
     setKeyword(next.name);
     setResults([]);
     onChange?.(next);
-
-    // 미니 미리보기(선택사항): 선택 후 맵/마커 갱신
-    // 이 컴포넌트 외부에 map 컨테이너를 두지 않고, 선택 UI만 쓰려면 아래는 스킵 가능
   };
 
   const clear = () => {
@@ -91,11 +85,13 @@ export default function MapSearchInput({
       <div style={{ display: "flex", gap: 8 }}>
         <input
           className={styles.input}
-          placeholder={placeholder}
+          placeholder={ready ? placeholder : "지도 로드 중..."}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           onFocus={() => setTouched(true)}
-          disabled={disabled || !ready}
+          // 🔥 수정: 로드 실패해도 입력 가능하게
+          disabled={Boolean(disabled)} 
+          style={{ position: "relative", zIndex: 1001, pointerEvents: "auto" }}
         />
         {value && (
           <button
@@ -110,12 +106,11 @@ export default function MapSearchInput({
         )}
       </div>
 
-      {/* 결과 드롭다운 */}
       {(results.length > 0 || loading) && (
         <ul
           style={{
             position: "absolute",
-            zIndex: 20,
+            zIndex: 2000,
             top: "100%",
             left: 0,
             right: 0,
@@ -151,7 +146,6 @@ export default function MapSearchInput({
         </ul>
       )}
 
-      {/* 선택 결과 요약 */}
       {value && (
         <p style={{ marginTop: 8, fontSize: 13, color: "#374151" }}>
           선택됨: <strong>{value.name}</strong>
@@ -159,7 +153,6 @@ export default function MapSearchInput({
         </p>
       )}
 
-      {/* 오류 핸들링 */}
       {err && <p className={styles.error}>카카오 로드 오류: {err.message}</p>}
     </div>
   );
