@@ -1,8 +1,7 @@
 import React, {useEffect , useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
-import carpoolImg from "./carpool.png";
-import './Home.css';
+import '../assets/styles/Home.css';
 import { FaUser, FaEdit, FaTrash, FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt, FaUniversity } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import CarpoolSlideshow from "./CarpoolSlideshow";
