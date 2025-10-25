@@ -23,7 +23,7 @@ function Header() {
         <NavLink to="/list" end className="nav-item">
           목록
         </NavLink>
-        <NavLink to="/add" className="nav-item">
+        <NavLink to="/create" className="nav-item">
           추가
         </NavLink>
       </nav>
