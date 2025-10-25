@@ -1,4 +1,4 @@
-// src/pages/update.jsx  (파일명은 네 프로젝트 네이밍에 맞춰서 사용)
+// src/pages/update.jsx
 // 기존: UpdatePage
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
