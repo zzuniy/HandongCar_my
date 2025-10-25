@@ -3,11 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import useKakaoLoader from "../hooks/useKakaoLoader";
 import styles from "../assets/styles/create&update.module.css";
 
-/**
- * value: 선택된 장소 텍스트(문자열)
- * onChange: (place|null) => void
- * place = { name, address, lat, lng }
- */
 export default function MapSearchInput({
   label = "장소",
   placeholder = "건물/장소명으로 검색",
@@ -21,28 +16,28 @@ export default function MapSearchInput({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
+  const [hl, setHl] = useState(-1);
+  const [composing, setComposing] = useState(false);
 
   const placesRef = useRef(null);
+  const inputRef = useRef(null);
 
-  // Places 인스턴스 준비 (맵 없이도 생성 가능)
   useEffect(() => {
     if (!ready || placesRef.current) return;
     placesRef.current = new window.kakao.maps.services.Places();
-    // console.log("[MSI] Places ready");
   }, [ready]);
 
-  // 외부 value가 바뀌면 인풋 동기화
   useEffect(() => {
     setQ(value || "");
   }, [value]);
 
-  // 디바운스 검색 함수
   const search = useMemo(() => {
     let t;
     return (kw) => {
       clearTimeout(t);
       if (!kw?.trim() || !placesRef.current) {
         setItems([]);
+        setHl(-1);
         return;
       }
       t = setTimeout(() => {
@@ -50,25 +45,31 @@ export default function MapSearchInput({
         placesRef.current.keywordSearch(kw, (data, status) => {
           setLoading(false);
           if (status === window.kakao.maps.services.Status.OK) {
-            setItems(data.slice(0, 8));
+            const list = data.slice(0, 8);
+            setItems(list);
+            setHl(list.length ? 0 : -1);
           } else {
             setItems([]);
+            setHl(-1);
           }
         });
-      }, 250);
+      }, 180);
     };
   }, []);
 
-  // 타이핑될 때마다 검색 + 드롭다운 제어
   useEffect(() => {
     if (!ready) return;
     const has = q.trim().length > 0;
     setOpen(has);
-    if (has) search(q);
-    else setItems([]);
-  }, [q, ready, search]);
+    if (!composing) {
+      if (has) search(q);
+      else {
+        setItems([]);
+        setHl(-1);
+      }
+    }
+  }, [q, composing, ready, search]);
 
-  // 항목 선택
   const pick = (it) => {
     const place = {
       name: it.place_name,
@@ -79,6 +80,7 @@ export default function MapSearchInput({
     setQ(place.name);
     setItems([]);
     setOpen(false);
+    setHl(-1);
     onChange?.(place);
   };
 
@@ -86,39 +88,80 @@ export default function MapSearchInput({
     setQ("");
     setItems([]);
     setOpen(false);
+    setHl(-1);
     onChange?.(null);
+    inputRef.current?.focus();
   };
+
+  const onKeyDown = (e) => {
+    if (!open || items.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHl((p) => (p + 1) % items.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHl((p) => (p - 1 + items.length) % items.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (hl >= 0) pick(items[hl]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  };
+
+  // 인풋에 오른쪽 여백을 주기 위한 스타일 (X 버튼 자리)
+  const inputStyle = useMemo(() => ({ paddingRight: 36 }), []);
 
   return (
     <div className={styles.field} style={{ position: "relative" }}>
       <label className={styles.label}>{label}</label>
 
-      <div style={{ display: "flex", gap: 8 }}>
+      <div style={{ position: "relative" }}>
         <input
+          ref={inputRef}
           className={styles.input}
           placeholder={placeholder}
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          onFocus={() => { if (q) { setOpen(true); search(q); } }}
+          onFocus={() => { if (q.trim()) setOpen(true); }}
+          onBlur={() => setTimeout(() => setOpen(false), 120)}
+          onKeyDown={onKeyDown}
+          onCompositionStart={() => setComposing(true)}
+          onCompositionEnd={() => setComposing(false)}
           disabled={disabled || !ready}
-          style={{ position: "relative", zIndex: 3, pointerEvents: "auto" }}
+          style={inputStyle}
           autoComplete="off"
         />
-        {!!value && (
+
+        {/* 인풋 내부 X 버튼 */}
+        {q && (
           <button
             type="button"
-            className={styles.button}
+            aria-label="지우기"
             onMouseDown={(e) => e.preventDefault()} // blur 방지
             onClick={clear}
-            disabled={disabled}
-            style={{ whiteSpace: "nowrap" }}
+            style={{
+              position: "absolute",
+              right: 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: 24,
+              height: 24,
+              borderRadius: 12,
+              border: "1px solid #e5e7eb",
+              background: "#fff",
+              fontSize: 16,
+              lineHeight: "22px",
+              textAlign: "center",
+              cursor: "pointer",
+              opacity: 0.9,
+            }}
           >
-            지우기
+            ×
           </button>
         )}
       </div>
 
-      {/* 검색 결과 드롭다운 */}
       {open && (items.length > 0 || loading) && (
         <ul
           style={{
@@ -126,35 +169,40 @@ export default function MapSearchInput({
             top: "100%",
             left: 0,
             right: 0,
-            zIndex: 9999,               // 최상위로
+            zIndex: 10000,
             background: "#fff",
-            border: "1px solid rgba(230,232,240,.7)",
-            borderRadius: 8,
+            border: "1px solid rgba(230,232,240,.9)",
+            borderRadius: 10,
             marginTop: 6,
-            maxHeight: 260,
+            maxHeight: 280,
             overflowY: "auto",
-            boxShadow: "0 8px 24px rgba(22,24,35,.12)",
+            boxShadow: "0 10px 28px rgba(22,24,35,.14)",
           }}
-          onMouseDown={(e) => e.preventDefault()} // 클릭 전에 blur되는 것 방지
+          onMouseDown={(e) => e.preventDefault()} // 목록 클릭 시 blur 방지
         >
           {loading && <li style={{ padding: 12, fontSize: 14 }}>검색 중…</li>}
+
           {!loading &&
-            items.map((r) => (
-              <li
-                key={r.id}
-                onClick={() => pick(r)}
-                style={{
-                  padding: "10px 12px",
-                  cursor: "pointer",
-                  borderBottom: "1px solid #f3f4f6",
-                }}
-              >
-                <div style={{ fontWeight: 600 }}>{r.place_name}</div>
-                <div style={{ fontSize: 12, color: "#6b7280" }}>
-                  {r.road_address_name || r.address_name}
-                </div>
-              </li>
-            ))}
+            items.map((r, i) => {
+              const active = i === hl;
+              return (
+                <li
+                  key={r.id}
+                  onMouseDown={() => pick(r)} // 1클릭 선택
+                  style={{
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    borderBottom: "1px solid #f3f4f6",
+                    background: active ? "#f5f7ff" : "#fff",
+                  }}
+                >
+                  <div style={{ fontWeight: 600 }}>{r.place_name}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280" }}>
+                    {r.road_address_name || r.address_name}
+                  </div>
+                </li>
+              );
+            })}
         </ul>
       )}
 
