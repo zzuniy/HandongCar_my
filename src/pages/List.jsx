@@ -2,7 +2,7 @@ import React, {useEffect , useState } from "react";
 import styled from "styled-components";
 import { GlobalStyle } from "../assets/styles/StyledComponents";
 
-import './Home.css';
+import './list.css';
 import { FaUser,FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
 
 
