@@ -71,7 +71,7 @@ function Card({data}){
             </span>
             <div className="card-actions">
               <button
-              onClick={() => navigate("/update/:id")}
+              onClick={() => navigate(`/update/${item.id}`)}
               ><FaEdit /></button>
 
             </div>
@@ -92,7 +92,7 @@ function Card({data}){
           />
           <button 
             className="detail" 
-            onClick={() => navigate("/detail/:id")}
+            onClick={() => navigate(`/post/${item.id}`)}
           >
             상세보기
           </button>
