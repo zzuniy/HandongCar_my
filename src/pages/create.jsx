@@ -29,29 +29,23 @@ export default function CreatePage() {
     password: ""
   });
 
-  // 1) 마운트/언마운트 로그
-useEffect(() => {
-  console.warn("[Create] mounted");
-  return () => console.warn("[Create] unmounted");
-}, []);
-
-// 2) form 변경 로그 + 전역으로 노출
-useEffect(() => {
-  console.warn("[Create] form:", form);
-  window.__form = form; // 콘솔에서 __form로 직접 확인 가능
-}, [form]);
+  // 디버깅(원하면 주석)
+  useEffect(() => {
+    // console.warn("[Create] form:", form);
+    window.__form = form;
+  }, [form]);
 
   const [errors, setErrors] = useState({
     host_nickname: "",
     start_point: "",
     destination: "",
+    start_lat: "",
+    dest_lat: "",
+    date: "",
+    time: "",
     note: "",
     password: ""
   });
-
-  useEffect(() => {
-    console.log("form 변화:", form);
-  }, [form]);
 
   const numericKeys = useMemo(() => ["total_people", "current_people"], []);
   const toInt = (v, fb = 0) => (Number.isFinite(+v) ? +v : fb);
@@ -62,6 +56,10 @@ useEffect(() => {
       host_nickname: "",
       start_point: "",
       destination: "",
+      start_lat: "",
+      dest_lat: "",
+      date: "",
+      time: "",
       note: "",
       password: ""
     };
@@ -79,6 +77,17 @@ useEffect(() => {
     if (!f.destination) e.destination = "도착지를 선택해 주세요.";
     else if (!under100(f.destination))
       e.destination = "도착지는 100자 미만이어야 합니다.";
+
+    // 좌표 필수 (목록에서 실제 클릭했는지 확인용)
+    if (f.start_point && (f.start_lat == null || f.start_lng == null)) {
+      e.start_lat = "출발지 좌표가 없습니다. 목록에서 장소를 선택하세요.";
+    }
+    if (f.destination && (f.dest_lat == null || f.dest_lng == null)) {
+      e.dest_lat = "도착지 좌표가 없습니다. 목록에서 장소를 선택하세요.";
+    }
+
+    if (!f.date) e.date = "날짜를 선택하세요.";
+    if (!f.time) e.time = "시간을 선택하세요.";
 
     if (!under100(f.note)) e.note = "비고는 100자 미만이어야 합니다.";
     if (!f.password) e.password = "비밀번호는 필수입니다.";
@@ -98,7 +107,7 @@ useEffect(() => {
             : toInt(value, 0)
           : value
       };
-      if (["host_nickname", "start_point", "destination", "note", "password"].includes(name)) {
+      if (["host_nickname", "start_point", "destination", "note", "password", "date", "time"].includes(name)) {
         validate(draft);
       }
       return draft;
@@ -111,7 +120,6 @@ useEffect(() => {
     const invalidKey = Object.keys(eMap).find((k) => eMap[k]);
     if (invalidKey) {
       alert("입력값을 확인하세요.");
-      // 첫 에러 위치로 스크롤 (해당 id가 존재해야 함)
       document.getElementById(invalidKey)?.scrollIntoView({
         behavior: "smooth",
         block: "center"
@@ -119,23 +127,32 @@ useEffect(() => {
       return;
     }
 
+    // 좌표 더블체크
+    if (
+      form.start_lat == null || form.start_lng == null ||
+      form.dest_lat == null || form.dest_lng == null
+    ) {
+      alert("출발지/도착지 목록에서 장소를 선택해 주세요.");
+      return;
+    }
+
     const total = toInt(form.total_people, 2);
-    const curr = toInt(form.current_people, 0);
+    const curr  = toInt(form.current_people, 0);
     if (curr > total) {
       alert("현재 인원이 정원을 초과했습니다.");
       return;
     }
 
+    // payload 클린업
     const next = {
       ...form,
       total_people: total,
       current_people: curr,
       status: "모집 중",
-      start_lat: form.start_lat ?? null,
-      start_lng: form.start_lng ?? null,
-      dest_lat: form.dest_lat ?? null,
-      dest_lng: form.dest_lng ?? null
+      created_at: new Date().toISOString()
     };
+    // 절대 보내지 말 것들 제거(혹시 섞여있다면)
+    delete next.nickname;
 
     try {
       setSubmitting(true);
@@ -196,32 +213,30 @@ useEffect(() => {
           {/* 2) 날짜 / 시간 */}
           <div className={styles.row2}>
             <div className={styles.field}>
-              <label htmlFor="date" className={styles.label}>
-                날짜
-              </label>
+              <label htmlFor="date" className={styles.label}>날짜</label>
               <input
                 id="date"
-                className={styles.input}
+                className={`${styles.input} ${errors.date ? styles.error : ""}`}
                 type="date"
                 name="date"
                 value={form.date}
                 onChange={onChange}
                 disabled={submitting}
               />
+              {errors.date && <p className={styles.error}>{errors.date}</p>}
             </div>
             <div className={styles.field}>
-              <label htmlFor="time" className={styles.label}>
-                시간
-              </label>
+              <label htmlFor="time" className={styles.label}>시간</label>
               <input
                 id="time"
-                className={styles.input}
+                className={`${styles.input} ${errors.time ? styles.error : ""}`}
                 type="time"
                 name="time"
                 value={form.time}
                 onChange={onChange}
                 disabled={submitting}
               />
+              {errors.time && <p className={styles.error}>{errors.time}</p>}
             </div>
           </div>
 
@@ -229,7 +244,7 @@ useEffect(() => {
           <div id="start_point">
             <MapSearchInput
               label="출발지 (검색 후 선택)"
-              value={form.start_point} // 문자열로 사용해도 동작
+              value={form.start_point}
               placeholder="예: 한동대 정문 / 포항시청 / 주소"
               onChange={(place) => {
                 if (!place) return;
@@ -245,8 +260,10 @@ useEffect(() => {
                 validate(draft);
               }}
               disabled={false}
-              error={errors.start_point}
             />
+            {(errors.start_point || errors.start_lat) && (
+              <p className={styles.error}>{errors.start_point || errors.start_lat}</p>
+            )}
           </div>
 
           <div id="destination">
@@ -268,16 +285,16 @@ useEffect(() => {
                 validate(draft);
               }}
               disabled={submitting}
-              error={errors.destination}
             />
+            {(errors.destination || errors.dest_lat) && (
+              <p className={styles.error}>{errors.destination || errors.dest_lat}</p>
+            )}
           </div>
 
           {/* 4) 정원 */}
           <div className={styles.row2}>
             <div className={styles.field}>
-              <label htmlFor="total_people" className={styles.label}>
-                정원
-              </label>
+              <label htmlFor="total_people" className={styles.label}>정원</label>
               <select
                 id="total_people"
                 className={`${styles.select} ${errors.total_people ? styles.error : ""}`}
@@ -295,9 +312,7 @@ useEffect(() => {
 
           {/* 비고 */}
           <div className={styles.field}>
-            <label htmlFor="note" className={styles.label}>
-              비고 (100자 미만)
-            </label>
+            <label htmlFor="note" className={styles.label}>비고 (100자 미만)</label>
             <textarea
               id="note"
               className={`${styles.textarea} ${errors.note ? styles.error : ""}`}
@@ -308,17 +323,13 @@ useEffect(() => {
               maxLength={100}
               disabled={submitting}
             />
-            <span className={styles.counter}>
-              {(form.note || "").length}/100
-            </span>
+            <span className={styles.counter}>{(form.note || "").length}/100</span>
             {errors.note && <p className={styles.error}>{errors.note}</p>}
           </div>
 
           {/* 비밀번호 */}
           <div className={styles.field}>
-            <label htmlFor="password" className={styles.label}>
-              비밀번호 (필수)
-            </label>
+            <label htmlFor="password" className={styles.label}>비밀번호 (필수)</label>
             <input
               id="password"
               className={`${styles.input} ${errors.password ? styles.error : ""}`}
@@ -328,9 +339,7 @@ useEffect(() => {
               onChange={onChange}
               disabled={submitting}
             />
-            {errors.password && (
-              <p className={styles.error}>{errors.password}</p>
-            )}
+            {errors.password && <p className={styles.error}>{errors.password}</p>}
           </div>
 
           {/* 제출 */}

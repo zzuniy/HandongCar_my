@@ -3,17 +3,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import useKakaoLoader from "../hooks/useKakaoLoader";
 import styles from "../assets/styles/create&update.module.css";
 
+/**
+ * value: 선택된 장소 텍스트(문자열)
+ * onChange: (place|null) => void
+ * place = { name, address, lat, lng }
+ */
 export default function MapSearchInput({
   label = "장소",
   placeholder = "건물/장소명으로 검색",
-  value = "",                // 선택된 장소 텍스트(문자열)
-  onChange,                  // (placeObj|null) => void
+  value = "",
+  onChange,
   disabled = false,
-  defaultCenter              // {lat,lng} (선택)
 }) {
   const { ready, err } = useKakaoLoader(process.env.REACT_APP_KAKAO_APP_KEY);
 
-  // 인풋 표시 텍스트(타이핑용)
   const [q, setQ] = useState(value || "");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,21 +24,17 @@ export default function MapSearchInput({
 
   const placesRef = useRef(null);
 
-  // Places 인스턴스 준비
+  // Places 인스턴스 준비 (맵 없이도 생성 가능)
   useEffect(() => {
     if (!ready || placesRef.current) return;
-    const center = new window.kakao.maps.LatLng(
-      defaultCenter?.lat ?? 36.5,
-      defaultCenter?.lng ?? 127.8
-    );
-    const dummy = document.createElement("div");
-    const map = new window.kakao.maps.Map(dummy, { center, level: 5 });
-    placesRef.current = new window.kakao.maps.services.Places(map);
-    console.log("[MSI] Places ready");
-  }, [ready, defaultCenter]);
+    placesRef.current = new window.kakao.maps.services.Places();
+    // console.log("[MSI] Places ready");
+  }, [ready]);
 
-  // 외부 value가 바뀌면 인풋 텍스트와 동기화
-  useEffect(() => { setQ(value || ""); }, [value]);
+  // 외부 value가 바뀌면 인풋 동기화
+  useEffect(() => {
+    setQ(value || "");
+  }, [value]);
 
   // 디바운스 검색 함수
   const search = useMemo(() => {
@@ -48,12 +47,10 @@ export default function MapSearchInput({
       }
       t = setTimeout(() => {
         setLoading(true);
-        console.log("[MSI] search:", kw);
         placesRef.current.keywordSearch(kw, (data, status) => {
           setLoading(false);
-          console.log("[MSI] result:", status, data?.length);
           if (status === window.kakao.maps.services.Status.OK) {
-            setItems(data.slice(0, 8));   // 상위 8개
+            setItems(data.slice(0, 8));
           } else {
             setItems([]);
           }
@@ -62,7 +59,7 @@ export default function MapSearchInput({
     };
   }, []);
 
-  // 🔥 타이핑될 때마다 검색 강제 + 드롭다운 자동 오픈
+  // 타이핑될 때마다 검색 + 드롭다운 제어
   useEffect(() => {
     if (!ready) return;
     const has = q.trim().length > 0;
@@ -82,8 +79,7 @@ export default function MapSearchInput({
     setQ(place.name);
     setItems([]);
     setOpen(false);
-    console.log("[MSI] picked:", place);
-    onChange?.(place); // 부모로 전달
+    onChange?.(place);
   };
 
   const clear = () => {
@@ -104,7 +100,7 @@ export default function MapSearchInput({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onFocus={() => { if (q) { setOpen(true); search(q); } }}
-          disabled={disabled}
+          disabled={disabled || !ready}
           style={{ position: "relative", zIndex: 3, pointerEvents: "auto" }}
           autoComplete="off"
         />
@@ -130,7 +126,7 @@ export default function MapSearchInput({
             top: "100%",
             left: 0,
             right: 0,
-            zIndex: 9999,                 // 🔥 최상위
+            zIndex: 9999,               // 최상위로
             background: "#fff",
             border: "1px solid rgba(230,232,240,.7)",
             borderRadius: 8,
