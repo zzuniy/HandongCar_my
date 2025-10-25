@@ -132,7 +132,6 @@ export default function CreatePage() {
     const eMap = validate(form);
     const firstInvalid = Object.keys(eMap).find((k) => eMap[k]);
     if (firstInvalid) {
-      alert("입력값을 확인하세요.");
       // 첫 에러 위치로 스크롤
       document.getElementById(firstInvalid)?.scrollIntoView({
         behavior: "smooth",

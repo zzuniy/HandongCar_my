@@ -16,7 +16,7 @@ export default function App() {
           <Route path="/post/:id" element={<DetailPage />} />
           <Route path="/create" element={<CreatePage />} />
           <Route path="/update/:id" element={<UpdatePage />} />
-          <Route path="/List" element={<ListPage />} />
+          <Route path="/list" element={<ListPage />} />
 
         </Route>
       </Routes>
