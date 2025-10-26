@@ -7,7 +7,6 @@ import '../assets/styles/list.css';
 import { FaUser,FaEdit, FaTrash,FaMapMarkerAlt, FaRegClock, FaUserFriends, FaPhoneAlt  } from "react-icons/fa";
 
 
-
 function Home(){
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -49,10 +48,10 @@ function Home(){
           + 게시글 추가
         </button>
       </div>
-   
+  
       <br/>
   
-     <Card data={filteredData} />
+      <Card data={filteredData} />
     </>
   );
 };
