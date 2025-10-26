@@ -1,0 +1,6 @@
+module.exports = {
+  turbopack: {
+    root: './Documents/OSS/MyNewProject',
+  },
+};
+

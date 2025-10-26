@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 28, "column": 0}, "map": {"version":3,"sources":["file:///Users/heojueun/Documents/OSS/MyNewProject/src/pages/api/speed.js"],"sourcesContent":["// pages/api/speed.js\nimport { SpeedInsights } from '@vercel/speed-insights/next';\n\nexport default async function handler(req, res) {\n  try {\n    // 테스트용 URL, 배포된 실제 URL로 바꾸세요\n    const urlToTest = 'https://handong-car-my.vercel.app'; \n    const result = await SpeedInsights({ url: urlToTest });\n    res.status(200).json(result);\n  } catch (err) {\n    res.status(500).json({ error: err.message });\n  }\n}\n"],"names":[],"mappings":"AAAA,qBAAqB;;;;;AACrB;;;;;;AAEe,eAAe,QAAQ,GAAG,EAAE,GAAG;IAC5C,IAAI;QACF,6BAA6B;QAC7B,MAAM,YAAY;QAClB,MAAM,SAAS,MAAM,IAAA,2LAAa,EAAC;YAAE,KAAK;QAAU;QACpD,IAAI,MAAM,CAAC,KAAK,IAAI,CAAC;IACvB,EAAE,OAAO,KAAK;QACZ,IAAI,MAAM,CAAC,KAAK,IAAI,CAAC;YAAE,OAAO,IAAI,OAAO;QAAC;IAC5C;AACF","debugId":null}}]
+}
